@@ -2,10 +2,50 @@
 //!
 //! This crate implements the [`ErrorLocation`] struct and its methods.
 
+use core::cmp::Ordering;
 use core::mem::take;
 
 use super::compile::{CompileError, ErrorLevel};
 use crate::errors::api::Located;
+use crate::utils::ord;
+
+/// Position in the source file to point to a specific location in the code when
+/// displaying an error.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Pos {
+    /// Column of the source file (starting at 0)
+    pub col: u32,
+    /// Line of the source file (starting at 0)
+    pub line: u32,
+}
+
+ord!(
+    Pos,
+    self,
+    other,
+    match self.line.cmp(&other.line) {
+        Ordering::Equal => self.col.cmp(&other.col),
+        ord @ (Ordering::Less | Ordering::Greater) => ord,
+    }
+);
+
+/// Position in the source file to point to a specific part of the code when
+/// displaying an error.
+///
+/// A span is a continuous succession of characters.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Span {
+    /// Length of the handled token (starts at pos and last len chars)
+    pub len: u32,
+    /// Cf. [`Pos`]
+    pub pos: Pos,
+}
+
+ord!(Span, self, other, self.pos.cmp(&other.pos));
+
+/// Wrapper around the file number, for type safety.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct FileId(pub u32);
 
 /// Type to pinpoint a precise character in the C source file.
 ///
@@ -24,40 +64,26 @@ pub enum ErrorLocation {
     /// # Fields
     ///
     /// file name, start line, start column, end line, end column
-    Block(u32, u32, u32, u32, u32),
-    /// Location on one char of the source file
-    ///
-    /// # Fields
-    ///
-    /// file name, line, column
-    Char(u32, u32, u32),
+    Block(FileId, Pos, Pos),
     /// Never built, useful for taking
     #[default]
     None,
+    /// Put squiggles for 3 tokens, but not between.
+    ThreeTokens(FileId, Span, Span, Span),
     /// Location a token of the source file
-    ///
-    /// # Fields
-    ///
-    /// file name, line, column, length
-    Token(u32, u32, u32, u32),
+    Token(FileId, Span),
     /// Put squiggles for 2 tokens, but not between.
-    ///
-    /// # Fields
-    ///
-    /// file,
-    /// first: line, col, len
-    /// second: line, col, len
-    TwoTokens(u32, u32, u32, u32, u32, u32, u32),
+    TwoTokens(FileId, Span, Span),
 }
 
 impl ErrorLocation {
     /// Returns the filename of the current [`ErrorLocation`]
-    fn as_filename(self) -> u32 {
+    fn as_filename(self) -> FileId {
         match self {
             Self::None => unreachable!("never built"),
             Self::Block(file, ..)
-            | Self::Char(file, ..)
             | Self::TwoTokens(file, ..)
+            | Self::ThreeTokens(file, ..)
             | Self::Token(file, ..) => file,
         }
     }
@@ -69,12 +95,12 @@ impl ErrorLocation {
     /// If called on an error location that cannot be extended.
     #[expect(clippy::arithmetic_side_effects, reason = "in range of tokens")]
     #[expect(clippy::panic, reason = "todo")]
-    fn as_pos(self) -> (u32, u32, u32, u32) {
+    fn as_pos(self) -> (Pos, Pos) {
         match self {
-            Self::Block(_, line_s, col_s, line_e, col_e) => (line_s, col_s, line_e, col_e),
-            Self::Char(_, line, col) => (line, col, line, col),
-            Self::Token(_, line, col, len) => (line, col, line, col + len),
-            Self::TwoTokens(..) => panic!("can not be extended"),
+            Self::Block(_, start, end) => (start, end),
+            Self::Token(_, Span { pos: Pos { line, col }, len }) =>
+                (Pos { col, line }, Pos { line, col: col + len }),
+            Self::TwoTokens(..) | Self::ThreeTokens(..) => panic!("can not be extended"),
             Self::None => unreachable!("never built"),
         }
     }
@@ -99,16 +125,12 @@ impl ErrorLocation {
         );
         let first = self.as_pos();
         let second = other.as_pos();
-        let (min, max) = if first.0 < second.0 || (first.0 == second.0 && first.1 <= second.1) {
-            (first, second)
-        } else {
-            (second, first)
-        };
+        let (min, max) = (first.min(second), first.max(second));
         let file = self.as_filename();
-        if min.0 == max.2 {
-            Self::Token(file, min.0, min.1, max.3.saturating_sub(min.1))
+        if min.0.line == max.1.line {
+            Self::Token(file, Span { pos: min.0, len: max.1.col.saturating_sub(min.0.col) })
         } else {
-            Self::Block(file, min.0, min.1, max.2, max.3)
+            Self::Block(file, min.0, max.1)
         }
     }
 
@@ -119,23 +141,28 @@ impl ErrorLocation {
     /// If one of the given error locations isn't a token.
     #[expect(clippy::panic, reason = "todo")]
     pub fn into_two_tokens(self, other: Self) -> Self {
-        if let Self::Token(file1, line1, col1, len1) = self
-            && let Self::Token(file2, line2, col2, len2) = other
-            && file1 == file2
-        {
-            if line1 < line2 || (line1 == line2 && col1 <= col2) {
-                Self::TwoTokens(file1, line1, col1, len1, line2, col2, len2)
-            } else {
-                Self::TwoTokens(file1, line2, col2, len2, line1, col1, len1)
+        match (self, other) {
+            (Self::Token(file1, span1), Self::Token(file2, span2)) if file1 == file2 =>
+                if span1 <= span2 {
+                    Self::TwoTokens(file1, span1, span2)
+                } else {
+                    Self::TwoTokens(file1, span2, span1)
+                },
+            (Self::TwoTokens(file1, span1, span2), Self::Token(file3, span3))
+            | (Self::Token(file3, span3), Self::TwoTokens(file1, span1, span2))
+                if file1 == file3 =>
+            {
+                let mut arr = [span1, span2, span3];
+                arr.sort();
+                Self::ThreeTokens(file1, arr[0], arr[1], arr[2])
             }
-        } else {
-            panic!("invariant")
+            _ => panic!("invariant"),
         }
     }
 
     /// Creates a new [`ErrorLocation`] of type char at the given position
     pub const fn new_char(file: u32, line: u32, col: u32) -> Self {
-        Self::Char(file, line, col)
+        Self::Token(FileId(file), Span { pos: Pos { col, line }, len: 1 })
     }
 
     /// Adds a value to the error location to make a [`Located`].

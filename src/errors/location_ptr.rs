@@ -4,6 +4,7 @@
 
 use super::compile::{CompileError, ErrorLevel};
 use crate::errors::api::ErrorLocation;
+use crate::errors::error_location::{FileId, Pos, Span};
 use crate::utils::usize_to_u32;
 
 /// Structure used to lex the items and move the pointer forward.
@@ -47,13 +48,18 @@ impl LocationPointer {
     pub(crate) const fn into_block(self, other: &Self) -> ErrorLocation {
         if self.line == other.line {
             ErrorLocation::Token(
-                self.file,
-                self.line,
-                self.col,
-                other.col.saturating_sub(self.col).saturating_add(1),
+                FileId(self.file),
+                Span {
+                    pos: Pos { line: self.line, col: self.col },
+                    len: other.col.saturating_sub(self.col).saturating_add(1),
+                },
             )
         } else {
-            ErrorLocation::Block(self.file, self.line, self.col, other.line, other.col)
+            ErrorLocation::Block(
+                FileId(self.file),
+                Pos { line: self.line, col: self.col },
+                Pos { line: other.line, col: other.col },
+            )
         }
     }
 
@@ -68,12 +74,17 @@ impl LocationPointer {
     /// warnings or errors.
     pub(crate) fn to_past(self, len: usize, offset: usize) -> ErrorLocation {
         ErrorLocation::Token(
-            self.file,
-            self.line,
-            self.col
-                .checked_sub(usize_to_u32(offset))
-                .expect("never happens"),
-            usize_to_u32(len),
+            FileId(self.file),
+            Span {
+                pos: Pos {
+                    line: self.line,
+                    col: self
+                        .col
+                        .checked_sub(usize_to_u32(offset))
+                        .expect("never happens"),
+                },
+                len: usize_to_u32(len),
+            },
         )
     }
 }

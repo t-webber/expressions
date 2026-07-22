@@ -92,15 +92,15 @@ pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope)
 
     loop {
         match (e_lines.next(), c_lines.next()) {
-            (Some(el), Some(cl)) if el == cl => eprintln!("{C0}{el}"),
+            (Some(el), Some(cl)) if el == cl => eprintln!(" │{C0}{el}"),
             (None, None) =>
                 if cfg!(feature = "no_test_fail") {
                     return;
                 } else {
                     panic!()
                 },
-            (Some(el), None) => eprintln!("{CE}e>{el}{C0}"),
-            (None, Some(cl)) => eprintln!("{CC}c<{cl}{C0}"),
+            (Some(el), None) => eprintln!("{CE}e│{el}{C0}"),
+            (None, Some(cl)) => eprintln!("{CC}c│{cl}{C0}"),
             (Some(el), Some(cl)) => {
                 let mut e_in = el.chars();
                 let mut c_in = cl.chars();
@@ -130,8 +130,8 @@ pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope)
                 }
                 c_out.extend(c_in);
                 e_out.extend(e_in);
-                eprintln!("{CC}c:{c_out}{C0}");
-                eprintln!("{CE}e:{e_out}{C0}");
+                eprintln!("{CC}c│{c_out}{C0}");
+                eprintln!("{CE}e│{e_out}{C0}");
             }
         }
     }

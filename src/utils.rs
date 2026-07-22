@@ -34,6 +34,22 @@ macro_rules! display {
     };
 }
 
+/// Helper to implement the [`Ord`] and [`PartialOrd`] traits
+macro_rules! ord {
+    ($ty:ty, $self:ident, $other:ident, $expr:expr) => {
+        impl Ord for $ty {
+            fn cmp(&$self, $other: &Self) -> Ordering {
+                $expr
+            }
+        }
+        impl PartialOrd for $ty {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                Some(self.cmp(other))
+            }
+        }
+    };
+}
+
 /// Implements the `From` trait for a variant of an enum whose name is the name
 /// of the underlying type.
 macro_rules! from {
@@ -134,3 +150,4 @@ pub fn usize_to_u32(val: usize) -> u32 {
 pub(crate) use bset;
 pub(crate) use display;
 pub(crate) use from;
+pub(crate) use ord;
