@@ -39,6 +39,22 @@ impl<T> Res<T> {
         self
     }
 
+    /// Adds an error to a current [`Res`] if the condition is true.
+    pub(crate) fn add_err_cond(mut self, cond: bool, error: CompileError) -> Self {
+        if cond {
+            self.errors.0.push(error);
+        }
+        self
+    }
+
+    /// Adds an error to a current [`Res`]
+    pub(crate) fn add_err_opt(mut self, error: Option<CompileError>) -> Self {
+        if let Some(err) = error {
+            self.errors.0.push(err);
+        }
+        self
+    }
+
     /// Adds an error to a current [`Res`]
     pub(crate) fn add_errs(mut self, errors: Vec<CompileError>) -> Self {
         self.errors.0.extend(errors);

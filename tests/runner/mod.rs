@@ -92,15 +92,15 @@ pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope)
 
     loop {
         match (e_lines.next(), c_lines.next()) {
-            (Some(el), Some(cl)) if el == cl => eprintln!(" │{C0}{el}"),
+            (Some(el), Some(cl)) if el == cl => eprint!(" │{C0}{el}{EOL}"),
             (None, None) =>
                 if cfg!(feature = "no_test_fail") {
                     return;
                 } else {
                     panic!()
                 },
-            (Some(el), None) => eprintln!("{CE}e│{el}{C0}"),
-            (None, Some(cl)) => eprintln!("{CC}c│{cl}{C0}"),
+            (Some(el), None) => eprint!("{CE}e│{el}{EOL}"),
+            (None, Some(cl)) => eprint!("{CC}c│{cl}{EOL}"),
             (Some(el), Some(cl)) => {
                 let mut e_in = el.chars();
                 let mut c_in = cl.chars();
@@ -122,16 +122,16 @@ pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope)
                         (Some(e_ch), Some(c_ch)) => {
                             let eq = e_ch == c_ch;
                             e_out.push_str(if eq { C0 } else { CE });
-                            e_out.push(e_ch);
+                            e_out.push(if e_ch == ' ' && !eq { '⍽' } else { e_ch });
                             c_out.push_str(if eq { C0 } else { CC });
-                            c_out.push(c_ch);
+                            c_out.push(if c_ch == ' ' && !eq { '⍽' } else { c_ch });
                         }
                     }
                 }
                 c_out.extend(c_in);
                 e_out.extend(e_in);
-                eprintln!("{CC}c│{c_out}{C0}");
-                eprintln!("{CE}e│{e_out}{C0}");
+                eprint!("{CC}c│{c_out}{EOL}");
+                eprint!("{CE}e│{e_out}{EOL}");
             }
         }
     }

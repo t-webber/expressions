@@ -60,18 +60,12 @@ macro_rules! from {
             }
         }
     };
-}
-
-/// Equivalent of vec!, but for hashset.
-macro_rules! bset {
-    () => {
-        #[expect(clippy::std_instead_of_alloc, reason="convenience for macro usage")]
-        {
-            std::collections::BTreeSet::new()
+    ($from:ident $int:ident $to:ty) => {
+        impl From<$from> for $to {
+            fn from(value: $from) -> Self {
+                Self::$int($int::from(value))
+            }
         }
-    };
-    ($($set:expr),*) => {
-        {let mut set = bset!(); $(set.insert($set);)* set}
     };
 }
 
@@ -147,7 +141,6 @@ pub fn usize_to_u32(val: usize) -> u32 {
     u32::try_from(val).expect("File too big, please refactor or split in multiple files.")
 }
 
-pub(crate) use bset;
 pub(crate) use display;
 pub(crate) use from;
 pub(crate) use ord;

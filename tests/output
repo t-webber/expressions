@@ -92,19 +92,19 @@ r#mod::lineariser::dereference_non_pointer 4
                ^
 
 r#mod::lineariser::dup_ind_attr 4
-:1:15: warning: The same attribute was provided twice
+:1:6: warning: Attribute was provided twice
     1 | int *restrict restrict x = 0
-                      ^~~~~~~~
+             ^~~~~~~~ ^~~~~~~~
 
 r#mod::lineariser::dup_mod 4
-:1:12: warning: The same attribute was provided twice
+:1:1: warning: Attribute was provided twice
     1 | signed int signed x = 0
-                   ^~~~~~
+        ^~~~~~     ^~~~~~
 
 r#mod::lineariser::dup_qual 4
-:1:11: warning: The same attribute was provided twice
+:1:1: warning: Attribute was provided twice
     1 | const int const x = 0
-                  ^~~~~
+        ^~~~~     ^~~~~
 
 r#mod::lineariser::fn_arg_kw 7
 :1:9: error: Missing argument type
@@ -271,9 +271,9 @@ r#mod::lineariser::literals::lin_lit_ulonglong 2
 [] const unsigned long long int x0 = 1
 [x] int x1 = x0
 r#mod::lineariser::long_long_long 4
-:1:11: warning: Found 3 `long` modifiers, max is 2.
+:1:1: warning: Found 3 `long` modifiers, max is 2.
     1 | long long long unsigned int x = 1
-                  ^~~~
+        ^~~~ ^~~~ ^~~~
 
 r#mod::lineariser::missing_ret_ty 4
 :1:1: error: Missing return type for function b
@@ -284,12 +284,12 @@ r#mod::lineariser::multiple_declarations 2
 [x] int x0 = x1
 [] const void * const x1 = NULL
 r#mod::lineariser::multiple_type_names 7
-:1:5: error: Found another type name, previous was int
+:1:1: error: found 2 type names
     1 | int char a b
-            ^~~~
-:1:10: error: Found another type name, previous was int
+        ^~~ ^~~~
+:1:5: error: found 2 type names
     1 | int char a b
-                 ^
+            ^~~~ ^
 
 r#mod::lineariser::pointer_bitwise_not 4
 :1:1: suggestion: Taking bitwise not of pointer is confusing
@@ -342,17 +342,17 @@ r#mod::lineariser::struct_ident_val 4
         ^~~~~~
 
 r#mod::lineariser::struct_on_builtin 4
-:1:8: error: struct for type int isn't allowed
+:1:1: error: Can't apply `struct` to builtin type `int`
     1 | struct int
-               ^~~
+        ^~~~~~ ^~~
 
 r#mod::lineariser::struct_on_enum 7
+:1:1: error: found 2 user defined type attributes
+    1 | struct enum a
+        ^~~~~~ ^~~~
 :1:1: error: Missing variable name or type name
     1 | struct enum a
         ^~~~~~~~~~~
-:1:8: error: Found `enum` after `struct` supposed to be applied on the same type
-    1 | struct enum a
-               ^~~~
 
 r#mod::lineariser::ternary_no_failure 4
 :1:9: error: Missing node after ':' in ternary operator
@@ -397,9 +397,9 @@ r#mod::lineariser::todo_attr 16
 :1:33: error: `typeof_unqual` keyword not yet supported
     1 | _Generic alignas _BigInt typeof typeof_unqual static int x = 1
                                         ^~~~~~~~~~~~~
-:1:54: error: Found another type name, previous was _BigInt
+:1:18: error: found 2 type names
     1 | _Generic alignas _BigInt typeof typeof_unqual static int x = 1
-                                                             ^~~
+                         ^~~~~~~                             ^~~
 
 r#mod::lineariser::unaries 10
 [a] const int x0 = ∅ 

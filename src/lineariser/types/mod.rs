@@ -10,42 +10,33 @@ mod name;
 /// [`ReturnType`].
 mod state;
 
-extern crate alloc;
-use alloc::collections::BTreeSet;
-
 use crate::errors::api::Located;
 use crate::lineariser::types::decorators::{
     FunctionAttribute, IndirectionDecorator, TypeDecorator
 };
-use crate::lineariser::types::name::TypeName;
+use crate::lineariser::types::name::{TypeName, TypeToken};
 use crate::lineariser::types::state::TypeParsingState;
 use crate::parser::api::{Attribute, Literal, Modifiers, Qualifiers};
-use crate::utils::{bset, display, repr_vec};
+use crate::utils::{display, repr_vec};
 use crate::{EMPTY, Number, Res};
 
 /// Helper macro to create a type attribute.
 macro_rules! lity {
-    ($base:ident, $base_decorations:expr, $($indirections:expr),*) => {
+    ($base:ident $($base_decorations:ident)*) => {
         Self {
-            base: TypeName::BasicDataType($crate::parser::api::BasicDataType::$base),
-            base_decorations: $base_decorations,
-            indirections: vec![$(bset![$indirections]),*],
+            base: TypeName::from($crate::parser::api::BasicDataType::$base),
+            base_decorations: vec![$(Modifiers::$base_decorations.into()),*],
+            indirections: vec![vec![Qualifiers::Const.into()]],
         }
     };
+    (star: $base:ident) => {
+        Self {
+            base: TypeName::from($crate::parser::api::BasicDataType::$base),
+            base_decorations: vec![],
+            indirections: vec![vec![Qualifiers::Const.into()], vec![Qualifiers::Const.into()]],
+        }
+    }
 }
-
-/// Shorthand for the `const` keyword.
-const CONST: IndirectionDecorator = IndirectionDecorator::Qualifiers(Qualifiers::Const);
-/// Shorthand for the `long` keyword.
-const LONG: TypeDecorator = TypeDecorator::Modifiers(Modifiers::Long);
-/// Shorthand for the `long long` double keyword.
-const LONG_LONG: TypeDecorator = TypeDecorator::Modifiers(Modifiers::LongLong);
-/// Shorthand for the `unsigned` keyword.
-const UNSIGNED: TypeDecorator = TypeDecorator::Modifiers(Modifiers::Unsigned);
-/// Shorthand for the `_Complex` keyword.
-const COMPLEX: TypeDecorator = TypeDecorator::Modifiers(Modifiers::Complex);
-/// Shorthand for the `_Imaginary` keyword.
-const IMAGINARY: TypeDecorator = TypeDecorator::Modifiers(Modifiers::Imaginary);
 
 /// Return type of a function.
 ///
@@ -54,7 +45,7 @@ const IMAGINARY: TypeDecorator = TypeDecorator::Modifiers(Modifiers::Imaginary);
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnType {
     /// Function-specific attributes.
-    attrs: BTreeSet<Located<FunctionAttribute>>,
+    attrs: Vec<FunctionAttribute>,
     /// Underlying type.
     ty: Type,
 }
@@ -75,27 +66,20 @@ display!(
 impl ReturnType {
     /// Returns a place holder return type for function defines but wrongly.
     pub const fn empty() -> Self {
-        Self { ty: Type::empty(), attrs: bset![] }
+        Self { ty: Type::empty(), attrs: vec![] }
     }
 
     /// Builds a [`ReturnType`] for a list of attributes.
     pub fn from_attributes(attrs: &[Located<Attribute>]) -> Res<Self> {
-        let mut state = TypeParsingState::default();
-        let mut errors = vec![];
-        for attr in attrs {
-            state
-                .add_attribute(attr)
-                .store_errors(&mut |err| errors.push(err));
-        }
-        state
-            .into_type(
+        TypeParsingState::parse_from(attrs).and_then(|state| {
+            state.into_return_type(
                 attrs
                     .first()
                     .expect("invariant")
                     .as_location()
                     .into_extended(attrs.last().expect("invariant").as_location()),
             )
-            .add_errs(errors)
+        })
     }
 
     /// Returns the type of the variable returned by such a function.
@@ -126,12 +110,12 @@ pub struct Type {
     /// # Examples
     ///
     /// `short`, `static`, etc.
-    base_decorations: BTreeSet<TypeDecorator>,
+    base_decorations: Vec<TypeDecorator>,
     /// Decorations on the base type name.
     ///
     /// The first element also applied to the base type name. Thus, the number
     /// of indirection levels is the length of the vector plus one.
-    indirections: Vec<BTreeSet<IndirectionDecorator>>,
+    indirections: Vec<Vec<IndirectionDecorator>>,
 }
 
 impl Type {
@@ -145,47 +129,46 @@ impl Type {
     /// Returns a place holder return type for function defines but wrongly.
     pub const fn empty() -> Self {
         Self {
-            base: TypeName::TypeDef(String::new()),
-            base_decorations: bset![],
+            base: TypeName::TypeToken(TypeToken::TypeDef(String::new())),
+            base_decorations: vec![],
             indirections: vec![],
         }
     }
 
-    /// Builds a [`ReturnType`] for a list of attributes.
+    /// Builds a [`Type`] for a list of attributes.
     pub fn from_attributes(attrs: &[Located<Attribute>]) -> Res<Self> {
-        ReturnType::from_attributes(attrs).and_then(|ret| {
-            let res = Res::ok(ret.ty);
-            for attr in ret.attrs {
-                attr.as_location().fail(format!(
-                    "Variable type contains function-only keyword {}",
-                    attr.as_value()
-                ));
-            }
-            res
+        TypeParsingState::parse_from(attrs).and_then(|state| {
+            state.into_type(
+                attrs
+                    .first()
+                    .expect("invariant")
+                    .as_location()
+                    .into_extended(attrs.last().expect("invariant").as_location()),
+            )
         })
     }
 
     /// Creates a type from the given base.
     fn from_base(base: TypeName) -> Self {
-        Self { base, base_decorations: bset![], indirections: vec![bset![]] }
+        Self { base, base_decorations: vec![], indirections: vec![vec![]] }
     }
 
     /// Builds and returns the type of a literal.
     pub fn from_lit(lit: &Literal) -> Self {
         match lit {
-            Literal::Char(_) => lity!(Char, bset![], CONST),
-            Literal::ConstantBool(_) => lity!(Bool, bset![], CONST),
-            Literal::Null => lity!(Void, bset![], CONST, CONST),
-            Literal::Str(_) => lity!(Char, bset![], CONST, CONST),
-            Literal::Number(Number::Int(_)) => lity!(Int, bset![], CONST),
-            Literal::Number(Number::Long(_)) => lity!(Int, bset![LONG], CONST),
-            Literal::Number(Number::LongLong(_)) => lity!(Int, bset![LONG_LONG], CONST),
-            Literal::Number(Number::Float(_)) => lity!(Float, bset![], CONST),
-            Literal::Number(Number::Double(_)) => lity!(Double, bset![], CONST),
-            Literal::Number(Number::LongDouble(_)) => lity!(Double, bset![LONG], CONST),
-            Literal::Number(Number::UInt(_)) => lity!(Int, bset![UNSIGNED], CONST),
-            Literal::Number(Number::ULong(_)) => lity!(Int, bset![UNSIGNED, LONG], CONST),
-            Literal::Number(Number::ULongLong(_)) => lity!(Int, bset![UNSIGNED, LONG_LONG], CONST),
+            Literal::Char(_) => lity!(Char),
+            Literal::ConstantBool(_) => lity!(Bool),
+            Literal::Null => lity!(star: Void),
+            Literal::Str(_) => lity!(star: Char),
+            Literal::Number(Number::Int(_)) => lity!(Int),
+            Literal::Number(Number::Long(_)) => lity!(Int Long),
+            Literal::Number(Number::LongLong(_)) => lity!(Int LongLong),
+            Literal::Number(Number::Float(_)) => lity!(Float),
+            Literal::Number(Number::Double(_)) => lity!(Double),
+            Literal::Number(Number::LongDouble(_)) => lity!(Double Long),
+            Literal::Number(Number::UInt(_)) => lity!(Int Unsigned),
+            Literal::Number(Number::ULong(_)) => lity!(Int Unsigned Long),
+            Literal::Number(Number::ULongLong(_)) => lity!(Int Unsigned LongLong),
         }
     }
 }

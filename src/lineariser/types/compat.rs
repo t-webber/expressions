@@ -1,8 +1,7 @@
 use crate::Res;
 use crate::errors::api::{ErrorLocation, Located};
-use crate::lineariser::types::{CONST, Type, UNSIGNED};
-use crate::parser::api::{BasicDataType, UnaryOperator};
-use crate::utils::bset;
+use crate::lineariser::types::Type;
+use crate::parser::api::{BasicDataType, Modifiers, Qualifiers, UnaryOperator};
 
 impl Type {
     /// Returns the output of a type when passed to a unary operator.
@@ -35,14 +34,15 @@ impl Type {
         self.indirections
             .last_mut()
             .expect(">=1")
-            .retain(|dec| *dec != CONST);
+            .retain(|dec| *dec != Qualifiers::Const.into());
         self
     }
 
     /// Drops the unsigned modifier, if present.
     fn drop_unsigned(mut self, loc: ErrorLocation) -> Res<Self> {
         let len = self.base_decorations.len();
-        self.base_decorations.retain(|dec| *dec != UNSIGNED);
+        self.base_decorations
+            .retain(|dec| *dec != Modifiers::Unsigned.into());
         if len == self.base_decorations.len() {
             Res::ok(self)
         } else {
@@ -53,7 +53,7 @@ impl Type {
     /// Adds or removes an indirection.
     fn indirection(mut self, add: bool, loc: ErrorLocation) -> Res<Self> {
         if add {
-            self.indirections.push(bset![]);
+            self.indirections.push(vec![]);
         } else if self.indirections.len() == 1 {
             return Res::ok(self)
                 .add_err(loc.fail("Trying to dereference a non-pointer expression".to_owned()));
