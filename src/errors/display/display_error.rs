@@ -22,30 +22,29 @@ fn display_error(
         ErrorLocation::Token(file, span) => CodeLine::new(file_contents, file, span.pos.line)
             .err1(span.pos.col, span.len, span.pos.line, &err_lvl)
             .disp(buf, msg),
-        ErrorLocation::Block(file, start, end) =>
-            if let start_code_line = CodeLine::new(file_contents, file, start.line)
-                && let name = start_code_line.0
-                && writeln!(buf).is_ok()
-                && display_prefix(buf, name, start.line, start.col, msg, &err_lvl)
-                && let start_len = usize_to_u32(
-                    start_code_line
-                        .1
-                        .len()
-                        .checked_sub(u32_to_usize(safe_decrement(start.col)))
-                        .expect("col <= len"),
-                )
+        ErrorLocation::Block(file, start, end) => {
+            let start_code_line = CodeLine::new(file_contents, file, start.line);
+            writeln!(buf).is_ok()
+                && display_prefix(buf, start_code_line.0, start.line, start.col, msg, &err_lvl)
                 && start_code_line
-                    .err1(start.col, start_len, start.line, &err_lvl)
+                    .err1(
+                        start.col,
+                        usize_to_u32(
+                            start_code_line
+                                .1
+                                .len()
+                                .checked_sub(u32_to_usize(safe_decrement(start.col)))
+                                .expect("col <= len"),
+                        ),
+                        start.line,
+                        &err_lvl,
+                    )
                     .disp(buf, "Multi-line error occurred. Starts here...")
                 && CodeLine::new(file_contents, file, end.line)
                     .err1(end.col, 1, end.line, &err_lvl)
                     .disp(buf, "...and ends here.")
                 && writeln!(buf).is_ok()
-            {
-                true
-            } else {
-                false
-            },
+        }
         ErrorLocation::None => unreachable!("never built"),
         ErrorLocation::TwoTokens(
             file,
@@ -62,7 +61,7 @@ fn display_error(
                     .disp(buf, msg)
                     && CodeLine::new(file_contents, file, line2)
                         .err1(col2, len2, line2, &err_lvl)
-                        .disp(buf, msg)
+                        .disp_opt(buf, None)
             },
         ErrorLocation::ThreeTokens(
             file,
@@ -91,26 +90,26 @@ fn display_error(
                 CodeLine::new(file_contents, file, line1)
                     .err2(col1, len1, col2, len2, line1, &err_lvl)
                     .disp(buf, msg)
-                    && CodeLine::new(file_contents, file, line1)
+                    && CodeLine::new(file_contents, file, line3)
                         .err1(col3, len3, line3, &err_lvl)
-                        .disp(buf, msg)
+                        .disp_opt(buf, None)
             } else if line2 == line3 {
                 CodeLine::new(file_contents, file, line1)
                     .err1(col1, len1, line1, &err_lvl)
                     .disp(buf, msg)
                     && CodeLine::new(file_contents, file, line2)
                         .err2(col2, len2, col3, len3, line2, &err_lvl)
-                        .disp(buf, msg)
+                        .disp_opt(buf, None)
             } else {
                 CodeLine::new(file_contents, file, line1)
                     .err1(col1, len1, line1, &err_lvl)
                     .disp(buf, msg)
                     && CodeLine::new(file_contents, file, line2)
                         .err1(col2, len2, line2, &err_lvl)
-                        .disp(buf, msg)
+                        .disp_opt(buf, None)
                     && CodeLine::new(file_contents, file, line3)
                         .err1(col3, len3, line3, &err_lvl)
-                        .disp(buf, msg)
+                        .disp_opt(buf, None)
             },
     }
 }

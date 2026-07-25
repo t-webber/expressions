@@ -144,9 +144,22 @@ dup_mod: "signed int signed x = 0"
 
 dup_ind_attr: "int *restrict restrict x = 0"
 
-long_long_long: "long long long unsigned int x = 1"
+long_long_long: "long unsigned long short long int x = 1"
+
+long1_long1_long2: "long unsigned long short
+long int x = 1"
+
+long1_long2_long2: "long unsigned
+long short long int x = 1"
+
+long1_long2_long3: "long unsigned
+long short
+long int x = 1"
 
 complex_decimal: "_Complex const _Decimal128"
+
+complex_decimal_2lines: "_Complex const
+_Decimal128 x"
 
 imaginary_decimal: "_Imaginary short _Decimal32"
 

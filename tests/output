@@ -68,6 +68,13 @@ r#mod::lineariser::complex_decimal 4
     1 | _Complex const _Decimal128
         ^~~~~~~~       ^~~~~~~~~~~
 
+r#mod::lineariser::complex_decimal_2lines 6
+:1:1: error: Decimal can't be complex, only real
+    1 | _Complex const
+        ^~~~~~~~
+    2 | _Decimal128 x
+        ^~~~~~~~~~~
+
 r#mod::lineariser::decl_statement 4
 :1:9: error: Expected expression in unary, got statement
     1 | int x = +
@@ -270,10 +277,33 @@ r#mod::lineariser::literals::lin_lit_ulong 2
 r#mod::lineariser::literals::lin_lit_ulonglong 2
 [] const unsigned long long int x0 = 1
 [x] int x1 = x0
+r#mod::lineariser::long1_long1_long2 6
+:1:1: warning: Found 3 `long` modifiers, max is 2.
+    1 | long unsigned long short
+        ^~~~          ^~~~
+    2 | long int x = 1
+        ^~~~
+
+r#mod::lineariser::long1_long2_long2 6
+:1:1: warning: Found 3 `long` modifiers, max is 2.
+    1 | long unsigned
+        ^~~~
+    2 | long short long int x = 1
+        ^~~~       ^~~~
+
+r#mod::lineariser::long1_long2_long3 8
+:1:1: warning: Found 3 `long` modifiers, max is 2.
+    1 | long unsigned
+        ^~~~
+    2 | long short
+        ^~~~
+    3 | long int x = 1
+        ^~~~
+
 r#mod::lineariser::long_long_long 4
 :1:1: warning: Found 3 `long` modifiers, max is 2.
-    1 | long long long unsigned int x = 1
-        ^~~~ ^~~~ ^~~~
+    1 | long unsigned long short long int x = 1
+        ^~~~          ^~~~       ^~~~
 
 r#mod::lineariser::missing_ret_ty 4
 :1:1: error: Missing return type for function b

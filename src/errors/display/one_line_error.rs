@@ -32,4 +32,14 @@ impl OneLineError<'_> {
             && display_snippet(buf, self.line, self.code_line)
             && display_squiggles(buf, self)
     }
+
+    /// Displays the error, with prefix, snippet and squiggles.
+    ///
+    /// Will display only snippet and squibles if message is None.
+    pub fn disp_opt(&self, buf: &mut String, msg_opt: Option<&str>) -> bool {
+        msg_opt.is_none_or(|msg| {
+            display_prefix(buf, self.file_name, self.line, self.col1, msg, self.err_lvl)
+        }) && display_snippet(buf, self.line, self.code_line)
+            && display_squiggles(buf, self)
+    }
 }
