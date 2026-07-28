@@ -129,6 +129,11 @@ r#mod::lineariser::fn_arg_no_name 7
     1 | void fn(const)
                 ^~~~~
 
+r#mod::lineariser::fn_attr_after_indirection 4
+:1:7: error: found function attribute after indirection
+    1 | int * inline f();
+              ^~~~~~
+
 r#mod::lineariser::fn_decl 1
 [func] f2(volatile static int * * x0, struct custom * x1) -> const char * ;
 r#mod::lineariser::fn_kwd_0_args 10

@@ -4,8 +4,6 @@
 //! to these logging, we can see a details call stack of the different functions
 //! of the parser.
 
-#![coverage(off)]
-
 use core::fmt;
 
 /// Main logger function to display the debug messages with the right colour and

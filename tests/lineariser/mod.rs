@@ -163,4 +163,6 @@ _Decimal128 x"
 
 imaginary_decimal: "_Imaginary short _Decimal32"
 
+fn_attr_after_indirection: "int * inline f();"
+
 );

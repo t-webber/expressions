@@ -142,16 +142,12 @@ impl ErrorLocation {
     #[expect(clippy::panic, reason = "todo")]
     pub fn into_two_tokens(self, other: Self) -> Self {
         match (self, other) {
-            (Self::Token(file1, span1), Self::Token(file2, span2)) if file1 == file2 =>
-                if span1 <= span2 {
-                    Self::TwoTokens(file1, span1, span2)
-                } else {
-                    Self::TwoTokens(file1, span2, span1)
-                },
-            (Self::TwoTokens(file1, span1, span2), Self::Token(file3, span3))
-            | (Self::Token(file3, span3), Self::TwoTokens(file1, span1, span2))
-                if file1 == file3 =>
-            {
+            (Self::Token(file1, span1), Self::Token(file2, span2)) if file1 == file2 => {
+                let mut arr = [span1, span2];
+                arr.sort();
+                Self::TwoTokens(file1, arr[0], arr[1])
+            }
+            (Self::TwoTokens(file1, span1, span2), Self::Token(file3, span3)) if file1 == file3 => {
                 let mut arr = [span1, span2, span3];
                 arr.sort();
                 Self::ThreeTokens(file1, arr[0], arr[1], arr[2])

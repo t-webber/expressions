@@ -4,8 +4,7 @@
 
 extern crate alloc;
 use alloc::vec;
-use core::ops::Residual;
-use core::{convert, fmt, ops};
+use core::{convert, ops};
 use std::process::exit;
 
 use super::compile::CompileError;
@@ -180,14 +179,7 @@ impl<T> Res<T> {
     }
 }
 
-impl<T: fmt::Debug> ops::FromResidual<CompileErrorList> for Res<T> {
-    fn from_residual(residual: CompileErrorList) -> Self {
-        Self { errors: residual, result: None }
-    }
-}
-
 impl<T> ops::FromResidual<Result<convert::Infallible, CompileError>> for Res<T> {
-    #[coverage(off)]
     fn from_residual(residual: Result<convert::Infallible, CompileError>) -> Self {
         match residual {
             Ok(_) => unreachable!(/* By definition of Infallible */),
@@ -202,27 +194,5 @@ where
 {
     fn from(value: (T, F)) -> Self {
         Self { errors: value.1.into(), result: Some(value.0) }
-    }
-}
-
-impl<T: fmt::Debug> Residual<T> for CompileErrorList {
-    type TryType = Res<T>;
-}
-
-impl<T: fmt::Debug> ops::Try for Res<T> {
-    type Output = T;
-    type Residual = CompileErrorList;
-
-    fn branch(self) -> ops::ControlFlow<Self::Residual, Self::Output> {
-        if let Some(result) = self.result {
-            ops::ControlFlow::Continue(result)
-        } else {
-            ops::ControlFlow::Break(self.errors)
-        }
-    }
-
-    #[coverage(off)]
-    fn from_output(output: Self::Output) -> Self {
-        Self::ok(output)
     }
 }

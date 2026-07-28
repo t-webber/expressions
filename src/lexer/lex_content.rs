@@ -167,10 +167,7 @@ pub fn lex(content: &str, file_id: u32) -> Res<Vec<Token>> {
     let mut escape_state = None;
 
     for line in content.lines() {
-        location.incr_line(
-            &mut #[coverage(off)]
-            |err| lex_data.push_err(err),
-        );
+        location.incr_line(&mut |err| lex_data.push_err(err));
         lex_line(line, &mut location, &mut lex_data, &mut lex_state, &mut escape_state);
     }
     end_current(&mut lex_state, &mut lex_data, &location);
