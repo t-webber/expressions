@@ -163,6 +163,20 @@ _Decimal128 x"
 
 imaginary_decimal: "_Imaginary short _Decimal32"
 
-fn_attr_after_indirection: "int * inline f();"
+fn_attr_after_indirection: "_Noreturn int * inline f();"
+
+union: "union A x = 1;"
+
+enum_: "enum A x = 1;"
+
+atomic: "_Atomic int x = 1;"
+
+fn_attr_in_var: "int inline x = 1"
+
+complex_struct: "_Complex struct A b = 2"
+
+fn_arg_shadows_global: "int x = 1; int f(char x);"
+
+non_top_level_fn: "int f() { int g(); }"
 
 );

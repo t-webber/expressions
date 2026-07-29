@@ -1,5 +1,5 @@
 [alias]
 pin = "test --config env.CARGO_PIN='pin'"
 unpin = "test --config env.CARGO_PIN='unpin'"
-cov = "tarpaulin --tests --doc -o Html --features no_test_fail"
+cov = "tarpaulin --tests --doc -o Html --features no_test_fail --features debug"
 first = "test -- -Zunstable-options --fail-fast"

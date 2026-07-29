@@ -1,3 +1,6 @@
+r#mod::lineariser::atomic 2
+[] const int x0 = 1
+[x] atomic int x1 = x0
 r#mod::lineariser::bin_missing_arg 4
 :1:9: error: Missing RHS of binary operator
     1 | int a = 1 << 
@@ -75,6 +78,11 @@ r#mod::lineariser::complex_decimal_2lines 6
     2 | _Decimal128 x
         ^~~~~~~~~~~
 
+r#mod::lineariser::complex_struct 4
+:1:1: error: User-defined type can't be complex
+    1 | _Complex struct A b = 2
+        ^~~~~~~~        ^
+
 r#mod::lineariser::decl_statement 4
 :1:9: error: Expected expression in unary, got statement
     1 | int x = +
@@ -113,6 +121,9 @@ r#mod::lineariser::dup_qual 4
     1 | const int const x = 0
         ^~~~~     ^~~~~
 
+r#mod::lineariser::enum_ 2
+[] const int x0 = 1
+[x] enum A x1 = x0
 r#mod::lineariser::fn_arg_kw 7
 :1:9: error: Missing argument type
     1 | void fn(sizeof)
@@ -129,10 +140,20 @@ r#mod::lineariser::fn_arg_no_name 7
     1 | void fn(const)
                 ^~~~~
 
+r#mod::lineariser::fn_arg_shadows_global 4
+:1:23: warning: Function argument shadows global variable
+    1 | int x = 1; int f(char x);
+                              ^
+
 r#mod::lineariser::fn_attr_after_indirection 4
-:1:7: error: found function attribute after indirection
-    1 | int * inline f();
-              ^~~~~~
+:1:17: error: found function attribute after indirection
+    1 | _Noreturn int * inline f();
+                        ^~~~~~
+
+r#mod::lineariser::fn_attr_in_var 4
+:1:5: error: Found function-only attribute in an object type
+    1 | int inline x = 1
+            ^~~~~~
 
 r#mod::lineariser::fn_decl 1
 [func] f2(volatile static int * * x0, struct custom * x1) -> const char * ;
@@ -326,6 +347,11 @@ r#mod::lineariser::multiple_type_names 7
     1 | int char a b
             ^~~~ ^
 
+r#mod::lineariser::non_top_level_fn 4
+:1:15: error: Non top-level functions is a GCC extension.
+    1 | int f() { int g(); }
+                      ^
+
 r#mod::lineariser::pointer_bitwise_not 4
 :1:1: suggestion: Taking bitwise not of pointer is confusing
     1 | ~&0
@@ -452,6 +478,9 @@ r#mod::lineariser::unary_statement 4
     1 | !int
          ^~~
 
+r#mod::lineariser::union 2
+[] const int x0 = 1
+[x] union A x1 = x0
 r#mod::lineariser::unscoped_redefinition 4
 :1:18: error: Redefinition of variable y
     1 | { int y = 2; int y = 3; }
