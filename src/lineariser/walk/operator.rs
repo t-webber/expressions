@@ -34,7 +34,7 @@ impl Binary {
                 Id::NotFound
             }
             (Some(Id::Found(id_l, ty_l)), Some(Id::Found(id_r, ty_r))) => {
-                let ty = ty_l.combine(&ty_r);
+                let ty = state.store_errors(ty_l.apply_binary(&op, &ty_r));
                 Id::Found(
                     state.push_element(Value::Binary(op.drop_location(), id_l, id_r), ty.clone()),
                     ty,
@@ -97,7 +97,7 @@ impl Ternary {
                         Some(Id::Found(node_s, ty_s)),
                         Some(Id::Found(node_f, ty_f)),
                     ) => {
-                        let ty = ty_c.combine(&ty_s).combine(&ty_f);
+                        let ty = state.store_errors(ty_c.apply_ternary(&ty_s, &ty_f));
                         Id::Found(
                             state.push_element(Value::Ternary(node_c, node_s, node_f), ty.clone()),
                             ty,

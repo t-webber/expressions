@@ -293,4 +293,14 @@ impl LState {
     pub fn stat_not_expr(&mut self, loc: ErrorLocation, scope: &str) {
         self.push_error(loc.fail(format!("Expected expression in {scope}, got statement")));
     }
+
+    /// Stores the errors of a result and returns the inner value.
+    ///
+    /// # Panics
+    ///
+    /// If the res doesn't contain any value.
+    pub fn store_errors<T>(&mut self, res: Res<T>) -> T {
+        res.store_errors(&mut |err| self.push_error(err))
+            .expect("invariant")
+    }
 }

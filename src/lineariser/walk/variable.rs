@@ -12,9 +12,7 @@ impl AttributeVariable {
     pub fn push_in(self, bbs: &mut BasicBlocks, state: &mut LState) {
         #[cfg(feature = "debug")]
         crate::lgp!(notab: "Pushing attr var {self}");
-        let ty = Type::from_attributes(&self.attrs)
-            .store_errors(&mut |err| state.push_error(err))
-            .expect("never none");
+        let ty = state.store_errors(Type::from_attributes(&self.attrs));
         for decl in self.declarations.into_iter().flatten() {
             decl.push_in(bbs, state, &ty);
         }

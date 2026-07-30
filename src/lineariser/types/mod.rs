@@ -65,7 +65,7 @@ display!(
 
 impl ReturnType {
     /// Returns a place holder return type for function defines but wrongly.
-    pub const fn empty() -> Self {
+    pub fn empty() -> Self {
         Self { ty: Type::empty(), attrs: vec![] }
     }
 
@@ -119,19 +119,12 @@ pub struct Type {
 }
 
 impl Type {
-    /// Combines 2 types.
-    #[expect(clippy::unused_self, reason = "todo")]
-    pub const fn combine(&self, _: &Self) -> Self {
-        // TODO: implement
-        Self::empty()
-    }
-
     /// Returns a place holder return type for function defines but wrongly.
-    pub const fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
             base: TypeName::TypeToken(TypeToken::TypeDef(String::new())),
             base_decorations: vec![],
-            indirections: vec![],
+            indirections: vec![vec![]],
         }
     }
 

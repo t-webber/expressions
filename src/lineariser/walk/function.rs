@@ -22,9 +22,7 @@ impl FunctionCall {
                     declare_function(
                         name,
                         arguments,
-                        ReturnType::from_attributes(&attrs)
-                            .store_errors(&mut |err| state.push_error(err))
-                            .expect("never none"),
+                        state.store_errors(ReturnType::from_attributes(&attrs)),
                         function_body,
                         state,
                     );
@@ -122,9 +120,7 @@ fn declare_function(
                 VariableValue::AttributeVariable(arg_attr) => {
                     let loc = arg_attr.location();
                     let (arg, attrs) = arg_attr.into_single_variable();
-                    let ty = Type::from_attributes(&attrs)
-                        .store_errors(&mut |err| state.push_error(err))
-                        .expect("never none");
+                    let ty = state.store_errors(Type::from_attributes(&attrs));
                     if let Some(arg_name) = arg {
                         args.push((arg_name, ty));
                     } else {

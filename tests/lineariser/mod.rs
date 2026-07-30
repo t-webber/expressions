@@ -1,5 +1,6 @@
 //! Lineariser tests.
 
+mod add;
 mod literals;
 
 crate::ssa!(
@@ -114,7 +115,7 @@ use_fn_kwd_as_leaf: "int x = sizeof"
 
 unsigned_minus: "const unsigned int a; -a;"
 
-unaries: "const int a; !a; &a; a++; a--; --a; ++a; -a; +a; ~a"
+unaries: "int a; !a; &a; a++; a--; --a; ++a; -a; +a; ~a"
 
 dereference_non_pointer: "int a; *a"
 
