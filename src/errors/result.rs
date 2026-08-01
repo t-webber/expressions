@@ -2,7 +2,6 @@
 //!
 //! This crate implements the [`Res`] struct and its methods.
 
-extern crate alloc;
 use alloc::vec;
 use core::{convert, ops};
 use std::process::exit;

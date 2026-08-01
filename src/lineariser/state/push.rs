@@ -1,6 +1,5 @@
 //! Public functions to add symbols in the lineariser state.
 
-extern crate alloc;
 use alloc::collections::btree_map::Entry;
 use std::collections::HashSet;
 

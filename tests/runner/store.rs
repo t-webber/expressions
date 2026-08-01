@@ -1,4 +1,3 @@
-extern crate alloc;
 use alloc::collections::BTreeMap;
 use std::env::var;
 use std::fs::{self, File};

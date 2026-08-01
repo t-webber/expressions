@@ -1,6 +1,5 @@
 //! Handler for block character
 
-extern crate alloc;
 use alloc::vec::IntoIter;
 use core::mem;
 

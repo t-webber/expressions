@@ -1,6 +1,5 @@
 //! Module to convert a list of [`Token`] into an [`Ast`].
 
-extern crate alloc;
 use alloc::vec::IntoIter;
 
 use super::keyword::handle_keyword;

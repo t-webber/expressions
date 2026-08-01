@@ -5,7 +5,6 @@ mod api;
 mod helpers;
 mod push;
 
-extern crate alloc;
 use alloc::collections::BTreeMap;
 use std::collections::HashMap;
 

@@ -1,6 +1,5 @@
 //! Public functions to interactive with the lineariser state.
 
-extern crate alloc;
 use alloc::collections::btree_map::BTreeMap;
 
 use crate::Res;

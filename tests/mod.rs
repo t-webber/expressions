@@ -9,6 +9,8 @@
     reason = "test"
 )]
 
+extern crate alloc;
+
 mod lineariser;
 mod parser;
 mod runner;

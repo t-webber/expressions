@@ -10,6 +10,8 @@
     try_trait_v2_residual
 )]
 
+extern crate alloc;
+
 mod errors;
 mod lexer;
 mod lineariser;

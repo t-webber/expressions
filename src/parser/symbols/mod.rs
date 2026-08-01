@@ -1,8 +1,6 @@
 //! Module to handle symbols, convert them to operators and push them into the
 //! [`Ast`].
 
-extern crate alloc;
-
 #[expect(clippy::inline_modules, reason = "clearer api")]
 pub mod api {
     //! Api module to choose what functions to export.

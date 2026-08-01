@@ -3,7 +3,6 @@ mod add;
 /// Helper to handle complex modifiers.
 mod complex;
 
-extern crate alloc;
 use alloc::collections::BTreeMap;
 use core::mem::take;
 
