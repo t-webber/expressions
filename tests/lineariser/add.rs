@@ -5,6 +5,10 @@ pointer_val: "int x; &x + 2"
 pointer_complex: "_Complex int x; &1 + x"
 pointer_decimal: "_Decimal32 x; &1 + x"
 
+complex: "_Complex int x; x + 1"
+imaginary: "_Imaginary int x; x + 1"
+imaginary_and_imaginary: "_Imaginary int x; x + x"
+
 void: "void x; x + 1"
 
 decimal_float: "_Decimal32 x; float y; x+y"

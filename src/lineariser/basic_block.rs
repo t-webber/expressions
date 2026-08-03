@@ -26,16 +26,6 @@ pub enum Id {
 }
 
 display!(
-    Id,
-    self,
-    f,
-    match self {
-        Self::Found(x, ty) => write!(f, "{ty} x{x}"),
-        Self::NotFound => "x".fmt(f),
-    }
-);
-
-display!(
     Instruction,
     self,
     f,

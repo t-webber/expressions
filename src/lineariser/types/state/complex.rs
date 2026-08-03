@@ -1,5 +1,4 @@
 use crate::errors::api::ErrorLocation;
-use crate::utils::display;
 
 /// Represent a modifier that indicates a complex type.
 pub enum FoundComplex {
@@ -17,14 +16,3 @@ impl FoundComplex {
         }
     }
 }
-
-display!(
-    FoundComplex,
-    self,
-    f,
-    match self {
-        Self::Complex(_) => "complex",
-        Self::Imaginary(_) => "imaginary",
-    }
-    .fmt(f)
-);

@@ -1,3 +1,7 @@
+r#mod::lineariser::add::complex 3
+[x] _Complex int x0 = ∅ 
+[] const int x1 = 1
+[] const _Complex int x2 = + x0 x1
 r#mod::lineariser::add::decimal_128 2
 [x] _Decimal128 x0 = ∅ 
 [] const _Decimal128 x1 = + x0 x0
@@ -24,6 +28,13 @@ r#mod::lineariser::add::huge_int 3
 [x] unsigned long long int x0 = ∅ 
 [] const unsigned long long int x1 = 18446744073709551615
 [] const unsigned long long int x2 = + x1 x0
+r#mod::lineariser::add::imaginary 3
+[x] _Imaginary int x0 = ∅ 
+[] const int x1 = 1
+[] const _Complex int x2 = + x0 x1
+r#mod::lineariser::add::imaginary_and_imaginary 2
+[x] _Imaginary int x0 = ∅ 
+[] const _Imaginary int x1 = + x0 x0
 r#mod::lineariser::add::int_bool_plus_char 3
 [x] bool x0 = ∅ 
 [y] char x1 = ∅ 
@@ -303,6 +314,13 @@ r#mod::lineariser::fn_sizeof 4
     1 | sizeof() { int x; }
         ^~~~~~
 
+r#mod::lineariser::fn_two_returns 6
+[f] f0() -> int
+  BB0:
+    return x1
+    return x2
+[] const int x1 = 1
+[] const int x2 = 2
 r#mod::lineariser::fn_wrong_args 4
 :1:9: error: Expected argument declaration
     1 | void fn(1)

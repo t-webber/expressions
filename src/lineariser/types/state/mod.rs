@@ -16,7 +16,6 @@ use crate::lineariser::types::decorators::{
 use crate::lineariser::types::name::{TypeName, TypeToken};
 use crate::lineariser::types::{ReturnType, Type};
 use crate::parser::api::{Attribute, BasicDataType, Modifiers, UserDefinedTypes};
-use crate::utils::{display, repr_vec};
 
 /// Automaton to parse the list of attributes into a structure type.
 #[derive(Debug)]
@@ -35,22 +34,6 @@ pub struct TypeParsingState {
     /// Keywords for user defined types, like `struct` or `enum`
     usr_def: Option<Located<UserDefinedTypes>>,
 }
-
-display!(TypeParsingState, self, f, {
-    let Self { base, base_attrs, usr_def, fn_attr, ind_attrs } = self;
-    repr_vec(fn_attr.keys(), " ").fmt(f)?;
-    repr_vec(base_attrs.keys(), " ").fmt(f)?;
-    if let Some(usr_def_ty) = usr_def {
-        usr_def_ty.fmt(f)?;
-    }
-    repr_vec(base, " ").fmt(f)?;
-    ind_attrs
-        .iter()
-        .map(|ind| repr_vec(ind.keys(), " "))
-        .collect::<Vec<_>>()
-        .join(" * ")
-        .fmt(f)
-});
 
 impl Default for TypeParsingState {
     fn default() -> Self {
