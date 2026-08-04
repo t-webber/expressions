@@ -45,7 +45,9 @@ fn lex_char(
 
         /* Create comment */
         ('*', state, _) if state.symbol_and_last_is('/') => {
-            state.clear_last_symbol();
+            if let LS::Symbols(symbol) = state {
+                symbol.clear_last();
+            }
             end_current(state, lex_data, location);
             *state = LS::Comment(CommentState::True);
         }
@@ -87,7 +89,9 @@ fn lex_char(
 
         /* Operator symbols */
         ('/', state, _) if state.symbol_and_last_is('/') => {
-            state.clear_last_symbol();
+            if let LS::Symbols(symbol) = state {
+                symbol.clear_last();
+            }
             end_current(state, lex_data, location);
             lex_data.set_end_line();
         }
@@ -194,19 +198,13 @@ fn lex_line(
     }
     let last = trimmed.len().checked_sub(1).expect("trimmed is not empty");
     for (idx, ch) in trimmed.chars().enumerate() {
-        location.incr_col(
-            &mut #[coverage(off)]
-            |err| lex_data.push_err(err),
-        );
+        location.incr_col(&mut |err| lex_data.push_err(err));
         lex_char(ch, location, lex_data, lex_state, escape_state, idx == last);
         if lex_data.is_end_line() {
             break;
         }
     }
-    location.incr_col(
-        &mut #[coverage(off)]
-        |err| lex_data.push_err(err),
-    );
+    location.incr_col(&mut |err| lex_data.push_err(err));
     if matches!(escape_state, Some(EscapeState::Single)) {
         *escape_state = None;
         if line.ends_with(char::is_whitespace) {

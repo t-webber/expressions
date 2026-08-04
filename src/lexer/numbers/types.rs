@@ -43,7 +43,7 @@ macro_rules! define_nb_types {
         #[derive(Debug, PartialEq)]
         pub enum Number {
             $(
-                /// $t C type
+                #[doc = concat!("`", stringify!($t), "` C type")]
                 $t($t),
             )*
         }

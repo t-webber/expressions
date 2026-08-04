@@ -1,5 +1,7 @@
 crate::ast!(
 
+two_float: "0.2ff"
+
 plus_trigraph: "+??'"
 
 empty_digit: "0x"

@@ -17,7 +17,6 @@ macro_rules! parse_hexadecimal_float {
                 let mut decimal_part: $t = 0.;
                 for (idx, ch) in $float_parse.decimal_part.chars().enumerate() {
                     let digit_value = $t::from_unsigned(hex_char_to_int(ch).into(), $overflow);
-                    println!("> {idx}");
                     let exponent_pow = $t::from(16f32).powf($t::from_usize(idx, $overflow) + 1.);
                     decimal_part += digit_value / exponent_pow;
                 }
@@ -52,7 +51,6 @@ macro_rules! impl_floating_point {
                 val as Self
             }
 
-            #[coverage(off)]
             fn from_usize(
                 val: usize,
                 overflow: &mut bool,

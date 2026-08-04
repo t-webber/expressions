@@ -1007,6 +1007,11 @@ r#mod::parser::numbers::signed_unsigned 4
     1 | -1u
          ^~
 
+r#mod::parser::numbers::two_float 4
+:1:1: error: Invalid number constant: found 2 'f' characters, but only 1 is needed.
+    1 | 0.2ff
+        ^~~~~
+
 r#mod::parser::operators::add_assign 1
 [(x += 1)..]
 r#mod::parser::operators::assign 1

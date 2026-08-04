@@ -27,20 +27,13 @@ pub struct SymbolState {
 
 impl SymbolState {
     /// Removes last pushed `char` of the state
-    ///
-    /// # Panics
-    ///
-    /// This function panics if there is any last `char`.
-    #[expect(clippy::panic, reason = "todo")]
     pub const fn clear_last(&mut self) {
         if self.third != NULL {
             self.third = NULL;
         } else if self.second != NULL {
             self.second = NULL;
-        } else if self.first != NULL {
-            self.first = NULL;
         } else {
-            panic!("unreachable: Called clear_last without checking that last exists.");
+            self.first = NULL;
         }
     }
 
@@ -254,7 +247,6 @@ impl From<char> for SymbolState {
     }
 }
 
-#[coverage(off)]
 impl fmt::Debug for SymbolState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "SymbolState({:?},{:?},{:?})", self.first, self.second, self.third)

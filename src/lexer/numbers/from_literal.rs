@@ -10,6 +10,51 @@ use crate::Res;
 use crate::errors::api::{ErrorLocation, LocationPointer};
 use crate::lexer::types::api::{Ident, LexingData};
 
+/// Whether the type is a double or a float.
+enum DoubleType {
+    /// Double type (no leading `f`).
+    Double,
+    /// Float.
+    Float,
+    /// Integer.
+    Int,
+}
+
+impl DoubleType {
+    /// Makes the double a float.
+    fn into_float(self) -> Result<Self, String> {
+        Err(match self {
+            Self::Double => return Ok(Self::Float),
+            Self::Float => format!("{ERR_PREFIX}found 2 'f' characters, but only 1 is needed."),
+            Self::Int => format!(
+                "{ERR_PREFIX}a 'f' suffix only works on `double` constants. Please insert a full stop or an 'e' exponent character before the 'f'."
+            ),
+        })
+    }
+}
+
+/// Number of `long` ident read.
+enum LongCount {
+    /// no `long`
+    None,
+    /// `long`
+    One,
+    /// `long long`
+    Two,
+}
+
+impl LongCount {
+    /// Increments the number `long` idents that were found.
+    const fn increment(&mut self) -> Option<&'static str> {
+        *self = match self {
+            Self::None => Self::One,
+            Self::One => Self::Two,
+            Self::Two => return Some("found 3 'l' characters, but max is 2 (`long long`)."),
+        };
+        None
+    }
+}
+
 /// Finds the base of the number constant by looking at the prefix
 ///
 /// # Returns
@@ -31,9 +76,9 @@ fn as_base(literal: &str, nb_type: NumberType, location: ErrorLocation) -> Res<B
         ('0', 'b') => location
             .fail(format!("{ERR_PREFIX}a binary must be an integer."))
             .into_res(),
-        ('0', '0'..='9') if nb_type.is_int() => Res::ok(Base::Octal),
+        ('0', '0'..='7') if nb_type.is_int() => Res::ok(Base::Octal),
         ('0', ch) if nb_type.is_int() => location
-            .fail(format!("{ERR_PREFIX}found illegal character '{ch}' in octal representation."))
+            .fail(format!("{ERR_PREFIX}found invalid character '{ch}' in octal base."))
             .into_res(),
         _ => Res::ok(Base::Decimal),
     }
@@ -90,16 +135,18 @@ fn as_number_type(literal: &str, location: ErrorLocation) -> Res<NumberType> {
             .into_res();
     }
 
-    /* literal characteristics */
-    let double_or_float = literal.contains('.')
-        || (is_hex && (literal.contains(['p', 'P'])))
-        || (!is_hex && (literal.contains(['e', 'E'])));
-
     // will be computed below
     let chars = literal.chars().rev();
-    let mut l_count: u32 = 0;
+    let mut l_count = LongCount::None;
     let mut unsigned = false;
-    let mut float = false;
+    let mut double = if literal.contains('.')
+        || (is_hex && (literal.contains(['p', 'P'])))
+        || (!is_hex && (literal.contains(['e', 'E'])))
+    {
+        DoubleType::Double
+    } else {
+        DoubleType::Int
+    };
 
     for ch in chars {
         match ch {
@@ -109,14 +156,15 @@ fn as_number_type(literal: &str, location: ErrorLocation) -> Res<NumberType> {
                     .into_res();
             }
             'u' | 'U' => unsigned = true,
-            'l' | 'L' if l_count == 2 => {
-                return location
-                    .fail("found 3 'l' characters, but max is 2 (`long long`).".to_owned())
-                    .into_res();
-            }
-            'l' | 'L' => l_count = l_count.checked_add(1).expect("l_count <= 1"),
-            'f' | 'F' if is_hex && !double_or_float => break,
-            'f' | 'F' => float = true,
+            'l' | 'L' =>
+                if let Some(err) = l_count.increment() {
+                    return location.fail(err.to_owned()).into_res();
+                },
+            'f' | 'F' if is_hex && matches!(double, DoubleType::Int) => break,
+            'f' | 'F' => match double.into_float() {
+                Ok(new) => double = new,
+                Err(err) => return location.fail(err).into_res(),
+            },
             'i' | 'I' =>
                 return location
                     .fail("imaginary constants are a GCC extension.".to_owned())
@@ -126,26 +174,23 @@ fn as_number_type(literal: &str, location: ErrorLocation) -> Res<NumberType> {
     }
 
     // get the type from the characteristics
-    let err = match (float, double_or_float, unsigned, l_count) {
-        (false, false, false, 0) => return Res::ok(NumberType::Int),
-        (false, false, false, 1) => return Res::ok(NumberType::Long),
-        (false, false, false, 2) => return Res::ok(NumberType::LongLong),
-        (false, false, true, 0) => return Res::ok(NumberType::UInt),
-        (false, false, true, 1) => return Res::ok(NumberType::ULong),
-        (false, false, true, 2) => return Res::ok(NumberType::ULongLong),
-        (false, true, false, 0) => return Res::ok(NumberType::Double),
-        (false, true, false, 1) => return Res::ok(NumberType::LongDouble),
-        (false, true, false, 2) => format!("{ERR_PREFIX}`long long double` doesn't exist."),
-        (true, _, true, _) => format!("{ERR_PREFIX}a `float` can't be `unsigned`."),
-        (_, true, true, _) => format!("{ERR_PREFIX}a `double` can't be `unsigned`."),
-        (true, false, _, _) if !is_hex => format!(
-            "{ERR_PREFIX}a 'f' suffix only works on `double` constants. Please insert a full stop or an 'e' exponent character before the 'f'."
-        ),
-        (true, true, false, 0) => return Res::ok(NumberType::Float),
-        (true, true, false, l_c) if l_c > 0 => format!(
+    let err = match (double, unsigned, l_count) {
+        (DoubleType::Int, false, LongCount::None) => return Res::ok(NumberType::Int),
+        (DoubleType::Int, false, LongCount::One) => return Res::ok(NumberType::Long),
+        (DoubleType::Int, false, LongCount::Two) => return Res::ok(NumberType::LongLong),
+        (DoubleType::Int, true, LongCount::None) => return Res::ok(NumberType::UInt),
+        (DoubleType::Int, true, LongCount::One) => return Res::ok(NumberType::ULong),
+        (DoubleType::Int, true, LongCount::Two) => return Res::ok(NumberType::ULongLong),
+        (DoubleType::Double, false, LongCount::None) => return Res::ok(NumberType::Double),
+        (DoubleType::Double, false, LongCount::One) => return Res::ok(NumberType::LongDouble),
+        (DoubleType::Double, false, LongCount::Two) =>
+            format!("{ERR_PREFIX}`long long double` doesn't exist."),
+        (DoubleType::Double, true, _) => format!("{ERR_PREFIX}a `double` can't be `unsigned`."),
+        (DoubleType::Float, false, LongCount::None) => return Res::ok(NumberType::Float),
+        (DoubleType::Float, false, LongCount::One | LongCount::Two) => format!(
             "{ERR_PREFIX}a `float` can't be `long`. Did you mean `long double`? Remove the leading 'f' if that is the case."
         ),
-        _ => unreachable!("never happens normally"),
+        (DoubleType::Float, true, _) => format!("{ERR_PREFIX}a `float` can't be `unsigned`."),
     };
     location.fail(err).into_res()
 }

@@ -14,7 +14,6 @@ macro_rules! impl_keywords {
             $($pascal,)*
         }
 
-        #[coverage(off)]
         impl Keyword {
             /// Tries to make a keyword from a literal.
             pub fn from_value_or_res(value: &str) -> TryKeyword {

@@ -52,15 +52,6 @@ pub enum LexingState {
 }
 
 impl LexingState {
-    /// See [`SymbolState::clear_last`].
-    pub fn clear_last_symbol(&mut self) {
-        if let Self::Symbols(symbol) = self {
-            symbol.clear_last();
-        } else {
-            unreachable!("Didn't check if allowed before calling on symbol")
-        }
-    }
-
     /// Creates an identifier from a char.
     pub fn new_ident(&mut self, ch: char) {
         *self = Self::Ident(Ident::from(ch.to_string()));
@@ -82,7 +73,6 @@ impl LexingState {
     }
 }
 
-#[coverage(off)]
 impl fmt::Debug for LexingState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

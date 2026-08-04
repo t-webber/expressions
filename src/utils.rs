@@ -25,7 +25,6 @@
 /// ```
 macro_rules! display {
     ($t:ty, $self:ident, $f:ident, $code:expr) => {
-        #[coverage(off)]
         impl core::fmt::Display for $t {
             fn fmt(&$self, $f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 $code
@@ -96,10 +95,8 @@ pub fn repr_vec<'item, T: fmt::Display + 'item, I: IntoIterator<Item = &'item T>
     vec: I,
     sep: &str,
 ) -> String {
-    vec.into_iter()
-        .map(ToString::to_string)
-        .collect::<Vec<_>>()
-        .join(sep)
+    let each = vec.into_iter().map(ToString::to_string).collect::<Vec<_>>();
+    each.join(sep)
 }
 
 /// Struct to track if object are used or not.
