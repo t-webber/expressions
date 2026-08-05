@@ -2,6 +2,7 @@
 
 mod add;
 mod literals;
+mod op;
 
 crate::ssa!(
 

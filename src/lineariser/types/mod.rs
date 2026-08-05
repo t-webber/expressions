@@ -1,11 +1,11 @@
 //! Module to define and handle type coherence and storing.
 
-/// Computes the new type after an operation.
-mod compat;
 /// Type decorators, like `const`, `short` or `thread_local`.
 mod decorators;
 /// Base of the type, like `struct A`, `custom` or `int`.
 mod name;
+/// Computes the new type after an operation.
+mod operator;
 /// Parsing state to read one by one the attributes and build a [`Type`] or
 /// [`ReturnType`].
 mod state;

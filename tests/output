@@ -473,6 +473,30 @@ r#mod::lineariser::non_top_level_fn 4
     1 | int f() { int g(); }
                       ^
 
+r#mod::lineariser::op::and 3
+[] const long long int x0 = 1
+[] const unsigned long int x1 = 2
+[] const bool x2 = && x0 x1
+r#mod::lineariser::op::assign 3
+[a] unsigned int x0 = ∅ 
+[b] long int x1 = ∅ 
+[] const unsigned int x2 = = x0 x1
+r#mod::lineariser::op::bitwise_and 3
+[] const long long int x0 = 1
+[] const unsigned long int x1 = 2
+[] const long long int x2 = & x0 x1
+r#mod::lineariser::op::shift_bll 3
+[] const bool x0 = true
+[] const unsigned long long int x1 = 1
+[] const int x2 = << x0 x1
+r#mod::lineariser::op::shift_llb 3
+[] const long long int x0 = 1
+[] const bool x1 = true
+[] const long long int x2 = >> x0 x1
+r#mod::lineariser::op::shift_lli 3
+[] const long long int x0 = 1
+[] const int x1 = 2
+[] const long long int x2 = << x0 x1
 r#mod::lineariser::pointer_bitwise_not 4
 :1:1: suggestion: Taking bitwise not of pointer is confusing
     1 | ~&0
