@@ -502,6 +502,17 @@ r#mod::lineariser::op::shift_lli 3
 [] const long long int x0 = 1
 [] const int x1 = 2
 [] const long long int x2 = << x0 x1
+r#mod::lineariser::parens_expr 5
+[] const int x0 = 1
+[] const int x1 = 2
+[] const int x2 = 3
+[] const int x3 = + x1 x2
+[] const int x4 = * x0 x3
+r#mod::lineariser::parens_none 4
+:1:1: error: Expected expression in parenthesised expression, got statement
+    1 | ()
+        ^~
+
 r#mod::lineariser::pointer_bitwise_not 4
 :1:1: suggestion: Taking bitwise not of pointer is confusing
     1 | ~&0

@@ -183,4 +183,8 @@ non_top_level_fn: "int f() { int g(); }"
 
 fn_two_returns: "int f() { return 1; return 2; }"
 
+parens_none: "()"
+
+parens_expr: "1 * (2 + 3)"
+
 );

@@ -86,10 +86,17 @@ impl Ast {
                     }
                 }
             }
+            Self::ParensBlock(parens) => {
+                let (inner, loc) = parens.into_inner();
+                let id = inner.push_in(bbs, state);
+                if id.is_none() {
+                    state.stat_not_expr(loc, "parenthesised expression");
+                }
+                id
+            }
             Self::Cast(_)
             | Self::FunctionArgsBuild(..)
             | Self::ListInitialiser(_)
-            | Self::ParensBlock(_)
             | Self::ControlFlow(_) => todo!("{self:?}"),
         }
     }
