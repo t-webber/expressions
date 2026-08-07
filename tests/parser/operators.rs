@@ -23,4 +23,6 @@ ternary_cast: "a ? (int)f : (void*)o"
 
 ternary_cast_function: "a ? (int)f(x) : (void*)o(y, z)"
 
+missing_rhs_binary: "a + << b"
+
 );

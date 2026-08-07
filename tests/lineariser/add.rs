@@ -1,6 +1,7 @@
 crate::ssa!(
 
 pointer_int: "&1 + 2"
+pointer_int_rev: "1 + &2"
 pointer_val: "int x; &x + 2"
 pointer_complex: "_Complex int x; &1 + x"
 pointer_decimal: "_Decimal32 x; &1 + x"

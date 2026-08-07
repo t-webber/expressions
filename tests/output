@@ -94,6 +94,11 @@ r#mod::lineariser::add::pointer_int 4
 [] const int * const x1 = & x0
 [] const int x2 = 2
 [] const int * const x3 = + x1 x2
+r#mod::lineariser::add::pointer_int_rev 4
+[] const int x0 = 1
+[] const int x1 = 2
+[] const int * const x2 = & x1
+[] const int * const x3 = + x0 x2
 r#mod::lineariser::add::pointer_val 4
 [x] int x0 = ∅ 
 [] int * const x1 = & x0
@@ -1044,6 +1049,11 @@ r#mod::parser::operators::cast_list_initialiser 1
 [((int *)°{1, 2, ((int)°PI..)}..)..]
 r#mod::parser::operators::incr_comment 1
 [(a * (b++))..]
+r#mod::parser::operators::missing_rhs_binary 4
+:1:5: error: Missing RHS for binary operator '+'.
+    1 | a + << b
+            ^~
+
 r#mod::parser::operators::ternary_blocks 1
 [(z &= (((((((((((a /= z)) * ((b %= y))) + c) - (((d / e) % f) * g)) + h) & i) | (j ^ k)) && l) || ((((m * n) + o) - ((p * q) / r)) + (s % t))) ? u : ((v && ((w ^ x) | y)) && (z != 2)))), ((!a) >> b)..]
 r#mod::parser::operators::ternary_cast 1

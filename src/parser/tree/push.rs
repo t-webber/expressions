@@ -143,8 +143,13 @@ impl Push for Ast {
             Self::Binary(Binary { op: old_op, arg_r: arg, .. }) => {
                 let associativity = op.associativity(); // same associativity for same precedence
                 match (old_op.precedence().cmp(&op.precedence()), associativity) {
-                    (Ordering::Less, _) | (Ordering::Equal, Associativity::LeftToRight) =>
-                        op.try_push_op_as_root(self),
+                    (Ordering::Less, _) | (Ordering::Equal, Associativity::LeftToRight) => {
+                        if arg.is_empty() {
+                            Err(format!("Missing RHS for binary operator '{old_op}'."))
+                        } else {
+                            op.try_push_op_as_root(self)
+                        }
+                    }
                     (Ordering::Greater, _) | (Ordering::Equal, Associativity::RightToLeft) =>
                         arg.push_op(op),
                 }
