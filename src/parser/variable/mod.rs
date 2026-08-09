@@ -12,6 +12,7 @@ pub mod api {
 
     #![allow(clippy::pub_use, reason = "expose simple API")]
 
+    pub use super::Variable;
     pub use super::attr_var::AttributeVariable;
     pub use super::declaration::{Declaration, DeclarationValue};
     pub use super::name::VariableName;

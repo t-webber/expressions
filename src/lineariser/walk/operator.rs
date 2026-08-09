@@ -4,7 +4,32 @@
 use crate::lineariser::basic_block::{BasicBlocks, Id};
 use crate::lineariser::state::LState;
 use crate::lineariser::symbol::Value;
-use crate::parser::api::{Binary, Ternary};
+use crate::parser::api::{Binary, Ternary, Unary};
+
+impl Unary {
+    /// Pushes some content into the [`BasicBlocks`].
+    pub fn push_in(self, bbs: &mut BasicBlocks, state: &mut LState) -> Id {
+        let loc = if self.arg.is_empty() {
+            self.op.as_location()
+        } else {
+            self.arg.location()
+        };
+        match self.arg.push_in(bbs, state) {
+            Some(Id::NotFound) => Id::NotFound,
+            Some(Id::Found(id, ty)) => {
+                let result = state.store_errors(ty.apply_unary(&self.op));
+                Id::Found(
+                    state.push_element(Value::Unary(*self.op.as_value(), id), result.clone()),
+                    result,
+                )
+            }
+            None => {
+                state.stat_not_expr(loc, "unary");
+                Id::NotFound
+            }
+        }
+    }
+}
 
 impl Binary {
     /// Pushes some content into the [`BasicBlocks`].

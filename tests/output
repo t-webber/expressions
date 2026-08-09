@@ -176,6 +176,9 @@ r#mod::lineariser::call_undeclared 4
     1 | int f() { g(1) }
                   ^
 
+r#mod::lineariser::cast_long_long 2
+[] const long long int x0 = 1
+[] int x1 = x0
 r#mod::lineariser::check_id_not_skipped 3
 [x] int x0 = x1
 [] const int x1 = 2

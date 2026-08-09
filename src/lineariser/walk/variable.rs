@@ -5,7 +5,35 @@ use crate::lineariser::basic_block::{BasicBlocks, Id};
 use crate::lineariser::state::LState;
 use crate::lineariser::symbol::Value;
 use crate::lineariser::types::Type;
-use crate::parser::api::{Ast, AttributeVariable, Declaration, DeclarationValue};
+use crate::parser::api::{
+    Ast, AttributeVariable, Declaration, DeclarationValue, Variable, VariableName, VariableValue
+};
+
+impl Variable {
+    /// Pushes some content into the [`BasicBlocks`].
+    pub fn push_in(self, bbs: &mut BasicBlocks, state: &mut LState) -> Option<Id> {
+        match self.into_value() {
+            VariableValue::AttributeVariable(attr) => {
+                attr.push_in(bbs, state);
+                None
+            }
+            VariableValue::VariableName(loc, VariableName::UserDefined(vname)) =>
+                #[expect(clippy::option_if_let_else, reason = "clippy bug")]
+                if let Some(decl) = state.find_declaration(&vname) {
+                    Some(Id::Found(decl.metadata.id, decl.metadata.ty.clone()))
+                } else {
+                    state.push_error(loc.fail(format!("Use of undeclared variable {vname}")));
+                    Some(Id::NotFound)
+                },
+            VariableValue::VariableName(loc, VariableName::Keyword(kwd)) => {
+                state.push_error(
+                    loc.fail(format!("Keyword {kwd} is a function, but no arguments were given")),
+                );
+                Some(Id::NotFound)
+            }
+        }
+    }
+}
 
 impl AttributeVariable {
     /// Pushes some content into the [`BasicBlocks`].

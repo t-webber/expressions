@@ -4,7 +4,7 @@ use crate::lineariser::basic_block::{BasicBlocks, Id, Instruction};
 use crate::lineariser::state::LState;
 use crate::lineariser::symbol::Value;
 use crate::lineariser::types::Type;
-use crate::parser::api::{Ast, ControlFlowNode, Unary, VariableName, VariableValue};
+use crate::parser::api::{Ast, Cast, ControlFlowNode};
 
 impl Ast {
     /// Pushes some content into the basic blocks.
@@ -29,28 +29,7 @@ impl Ast {
             }
             Self::FunctionCall(func) => func.push_in(bbs, state),
             Self::Empty => None,
-            Self::Variable(var) => match var.into_value() {
-                VariableValue::AttributeVariable(attr) => {
-                    attr.push_in(bbs, state);
-                    None
-                }
-                VariableValue::VariableName(loc, VariableName::UserDefined(vname)) =>
-                    #[expect(clippy::option_if_let_else, reason = "clippy bug")]
-                    if let Some(decl) = state.find_declaration(&vname) {
-                        Some(Id::Found(decl.metadata.id, decl.metadata.ty.clone()))
-                    } else {
-                        state.push_error(loc.fail(format!("Use of undeclared variable {vname}")));
-                        Some(Id::NotFound)
-                    },
-                VariableValue::VariableName(loc, VariableName::Keyword(kwd)) => {
-                    state.push_error(
-                        loc.fail(format!(
-                            "Keyword {kwd} is a function, but no arguments were given"
-                        )),
-                    );
-                    Some(Id::NotFound)
-                }
-            },
+            Self::Variable(var) => var.push_in(bbs, state),
             Self::Leaf(lit) => {
                 let ty = Type::from_lit(lit.as_value());
                 Some(Id::Found(state.push_literal(lit.drop_location()), ty))
@@ -65,27 +44,7 @@ impl Ast {
             }
             Self::Binary(bin) => Some(bin.push_in(bbs, state)),
             Self::Ternary(ter) => Some(ter.push_in(bbs, state)),
-            Self::Unary(Unary { arg, op }) => {
-                let loc = if arg.is_empty() {
-                    op.as_location()
-                } else {
-                    arg.location()
-                };
-                match arg.push_in(bbs, state) {
-                    Some(Id::NotFound) => Some(Id::NotFound),
-                    Some(Id::Found(id, ty)) => {
-                        let result = state.store_errors(ty.apply_unary(&op));
-                        Some(Id::Found(
-                            state.push_element(Value::Unary(*op.as_value(), id), result.clone()),
-                            result,
-                        ))
-                    }
-                    None => {
-                        state.stat_not_expr(loc, "unary");
-                        Some(Id::NotFound)
-                    }
-                }
-            }
+            Self::Unary(un) => Some(un.push_in(bbs, state)),
             Self::ParensBlock(parens) => {
                 let (inner, loc) = parens.into_inner();
                 let id = inner.push_in(bbs, state);
@@ -94,10 +53,22 @@ impl Ast {
                 }
                 id
             }
-            Self::Cast(_)
-            | Self::FunctionArgsBuild(..)
-            | Self::ListInitialiser(_)
-            | Self::ControlFlow(_) => todo!("{self:?}"),
+            Self::Cast(Cast { dest_type, value, .. }) => {
+                let value_loc = value.location();
+                match value.push_in(bbs, state) {
+                    Some(Id::Found(id, _)) => {
+                        let ty = state.store_errors(Type::from_attributes(&dest_type));
+                        Some(Id::Found(state.push_element(Value::Variable(id), ty.clone()), ty))
+                    }
+                    Some(Id::NotFound) => Some(Id::NotFound),
+                    None => {
+                        state.stat_not_expr(value_loc, "cast");
+                        Some(Id::NotFound)
+                    }
+                }
+            }
+            Self::FunctionArgsBuild(..) | Self::ListInitialiser(_) | Self::ControlFlow(_) =>
+                todo!("{self:?}"),
         }
     }
 }

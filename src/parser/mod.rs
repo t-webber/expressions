@@ -12,10 +12,10 @@ pub mod api {
     pub use super::literal::{Attribute, Literal};
     pub use super::operators::api::{Binary, BinaryOperator, Ternary, Unary, UnaryOperator};
     pub use super::parse_content::parse;
-    pub use super::symbols::api::{BracedBlock, FunctionCall};
+    pub use super::symbols::api::{BracedBlock, Cast, FunctionCall};
     pub use super::tree::Ast;
     pub use super::variable::api::{
-        AttributeVariable, Declaration, DeclarationValue, VariableName, VariableValue
+        AttributeVariable, Declaration, DeclarationValue, Variable, VariableName, VariableValue
     };
     pub use crate::parser::keyword::attributes::{
         AttributeKeyword, BasicDataType, Modifiers, Qualifiers, SpecialAttributes, Storage, UserDefinedTypes

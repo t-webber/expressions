@@ -187,4 +187,6 @@ parens_none: "()"
 
 parens_expr: "1 * (2 + 3)"
 
+cast_long_long: "(int)1LL"
+
 );
