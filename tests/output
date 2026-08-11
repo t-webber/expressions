@@ -179,6 +179,10 @@ r#mod::lineariser::call_undeclared 4
 r#mod::lineariser::cast_long_long 2
 [] const long long int x0 = 1
 [] int x1 = x0
+r#mod::lineariser::cast_recast_var_unused 3
+[x] char x0 = ∅ 
+[] int x1 = x0
+[] bool x2 = x1
 r#mod::lineariser::check_id_not_skipped 3
 [x] int x0 = x1
 [] const int x1 = 2
@@ -704,7 +708,7 @@ r#mod::parser::blocks::list_init_cast 4
             ^
 
 r#mod::parser::blocks::list_init_cast_full 4
-:1:7: error: Found 2 successive literals, missing semi-colon.
+:1:7: error: Found 2 consecutive literals: block [((a)°(b)..)..] followed by {}.
     1 | (a)(b){c}
               ^
 
@@ -1209,7 +1213,7 @@ r#mod::parser::variables::block_comment 1
 r#mod::parser::variables::cast 1
 [((type)°x..)..]
 r#mod::parser::variables::cast_expr 1
-[((double)°(((x++) + y)))..]
+[((double)°(((x++) + y))..)..]
 r#mod::parser::variables::cast_higher_precedence 1
 [(((float)°x..) + y)..]
 r#mod::parser::variables::cast_int 1

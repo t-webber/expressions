@@ -189,4 +189,6 @@ parens_expr: "1 * (2 + 3)"
 
 cast_long_long: "(int)1LL"
 
+cast_recast_var_unused: "char x; (bool)(int)x"
+
 );

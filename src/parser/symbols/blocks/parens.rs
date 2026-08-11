@@ -58,7 +58,7 @@ impl Cast {
                 })
             })
         } else {
-            let full = matches!(new, Ast::Cast(_) | Ast::ListInitialiser(_) | Ast::ParensBlock(_));
+            let full = matches!(new, Ast::Cast(_) | Ast::ListInitialiser(_)); // BUG: | Ast::ParensBlock(_));
             parens.take_pure_type().map(|dest_type| {
                 Ast::Cast(Self {
                     dest_type,
