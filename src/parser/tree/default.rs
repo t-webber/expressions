@@ -39,7 +39,7 @@ impl Ast {
             | Self::Cast(Cast { full: true, .. })
             | Self::Ternary(Ternary { failure: None, .. }) => true,
             Self::Variable(var) => ctx.is_user_variable() || var.can_push_leaf(),
-            Self::ParensBlock(parens) => parens.is_pure_type() && ctx.is_user_variable(),
+            Self::ParensBlock(parens) => parens.is_pure_type() && ctx.is_castable(),
             Self::Leaf(_) | Self::FunctionCall(_) => false,
             Self::Cast(Cast { full: false, value: arg, .. })
             | Self::Unary(Unary { arg, .. })
@@ -203,6 +203,10 @@ impl Ast {
         if let Some(last) = vec.last_mut() {
             let ctx = if matches!(node, Self::Variable(_)) {
                 AstPushContext::UserVariable
+            } else if let Self::ParensBlock(parens) = &node
+                && parens.is_pure_type()
+            {
+                AstPushContext::Cast
             } else {
                 AstPushContext::None
             };

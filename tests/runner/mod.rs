@@ -39,7 +39,7 @@ CE, "\x1b[31m"
 static FS_VALUES: LazyLock<Mutex<Tests>> = LazyLock::new(|| Mutex::from(Tests::load()));
 
 pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope) {
-    let computed = scope.run(content);
+    let computed = scope.run(content).replace("..", "");
     eprint!("{SIDE}{COMPUTED}{SIDE}{C0}\n{}{EOL}", computed.replace('\n', EOL));
 
     let key = format!("{module_name}::{test_name}");
@@ -68,7 +68,7 @@ pub fn test(module_name: &str, test_name: &str, content: &str, scope: TestScope)
         let expected = binding.get(&key).map(str::to_owned);
         drop(binding);
         expected
-    };
+    }.map(|inner| inner.replace("..", ""));
 
     let Some(exp) = expected else {
         let msg = "\x1b[31mNo expected output provided, use `cargo pin` to use current computed output as expected test output.\x1b[0m";

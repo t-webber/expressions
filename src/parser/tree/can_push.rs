@@ -17,6 +17,8 @@ impl CanPush for Ast {
 pub enum AstPushContext {
     /// Any context is good
     Any,
+    /// Castable object.
+    Cast,
     /// Trying to see if an `else` block ca be added
     Else,
     /// Nothing particular
@@ -27,6 +29,11 @@ pub enum AstPushContext {
 }
 
 impl AstPushContext {
+    /// Checks if the context can have a cast.
+    pub const fn is_castable(&self) -> bool {
+        matches!(self, &Self::Any | &Self::UserVariable | &Self::Cast)
+    }
+
     /// Checks if the context can have an `else`
     pub const fn is_else(&self) -> bool {
         matches!(self, &Self::Any | &Self::Else)

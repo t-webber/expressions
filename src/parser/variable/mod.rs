@@ -42,7 +42,7 @@ use super::modifiers::push::Push as _;
 use super::tree::api::Ast;
 use crate::errors::api::{ErrorLocation, Located};
 use crate::parser::keyword::control_flow::types::colon_ast::ColonAstCtrl;
-use crate::utils::display;
+use crate::utils::{display, repr_fullness};
 
 /// Different variable cases
 #[derive(Debug)]
@@ -221,7 +221,7 @@ impl From<Located<String>> for Variable {
     }
 }
 
-display!(Variable, self, f, self.value.fmt(f));
+display!(Variable, self, f, write!(f, "{}{}", self.value, repr_fullness(self.full)));
 
 /// Makes an error for values found after a [`FunctionKeyword`].
 fn after_keyword_err<T: fmt::Display>(name: &str, value: T, keyword: &FunctionKeyword) -> String {

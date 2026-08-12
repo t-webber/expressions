@@ -191,4 +191,6 @@ cast_long_long: "(int)1LL"
 
 cast_recast_var_unused: "char x; (bool)(int)x"
 
+cast_recast_var_assign: "char x; x = (bool)(int)x"
+
 );

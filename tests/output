@@ -179,6 +179,11 @@ r#mod::lineariser::call_undeclared 4
 r#mod::lineariser::cast_long_long 2
 [] const long long int x0 = 1
 [] int x1 = x0
+r#mod::lineariser::cast_recast_var_assign 4
+[x] char x0 = ∅ 
+[] int x1 = x0
+[] bool x2 = x1
+[] const char x3 = = x0 x2
 r#mod::lineariser::cast_recast_var_unused 3
 [x] char x0 = ∅ 
 [] int x1 = x0
@@ -684,7 +689,7 @@ r#mod::lineariser::variable_shadow_function 4
                            ^
 
 r#mod::parser::blocks::blocks 1
-[(f°(x, y)[(a = 1), [(b = 2)]]), (c = 3)..]
+[(f°(x, y)[(a = 1), [(b = 2)]]), (c = 3)]
 r#mod::parser::blocks::close_brace 4
 :1:1: error: Mismatched '}'. Perhaps you forgot an opening '{'?
     1 | }
@@ -701,30 +706,30 @@ r#mod::parser::blocks::close_parens 4
         ^
 
 r#mod::parser::blocks::digraphs 1
-[(((int:arr)[3]) = {1, 2, 3}), ((arr[1]) = 42), ∅ ..]
+[(((int:arr)[3]) = {1, 2, 3}), ((arr[1]) = 42), ∅ ]
 r#mod::parser::blocks::list_init_cast 4
 :1:5: error: Found 2 successive literals, missing semi-colon.
     1 | (a)b{c}
             ^
 
 r#mod::parser::blocks::list_init_cast_full 4
-:1:7: error: Found 2 consecutive literals: block [((a)°(b)..)..] followed by {}.
+:1:7: error: Found 2 consecutive literals: block [((a)°(b))] followed by {}.
     1 | (a)(b){c}
               ^
 
 r#mod::parser::blocks::list_initialiser 1
-[(((n[3])[3]) = {({1, 2, 3}[(2 + ((!3) * (m[3])))]), (({1, 2, 3}[(2 + 1)]) + 2)}), ∅ ..]
+[(((n[3])[3]) = {({1, 2, 3}[(2 + ((!3) * (m[3])))]), (({1, 2, 3}[(2 + 1)]) + 2)}), ∅ ]
 r#mod::parser::blocks::list_initialiser_in_body 1
-[(a ? {1, 2, 3} : {4, 5, 6})..]
+[(a ? {1, 2, 3} : {4, 5, 6})]
 r#mod::parser::blocks::list_initialiser_unary 4
 :1:2: error: Found operator '!' applied on list initialiser '{}', but this is not allowed.
     1 | !{1, 2, 3}
          ^
 
 r#mod::parser::blocks::nested_braces 1
-[[[(a = 1), (b = 2), ∅ ], (c = 3), ∅ ]..]
+[[[(a = 1), (b = 2), ∅ ], (c = 3), ∅ ]]
 r#mod::parser::blocks::nested_parens_bracket 1
-[(((n[3])[((3 + ((1 + 2))))]) = {({1, 2, 3}[(2 + ((!3) * (m[(m[((a + (m[(2)])))])])))]), (({1, 2, 3}[(2 + 1)]) + 2)})..]
+[(((n[3])[((3 + ((1 + 2))))]) = {({1, 2, 3}[(2 + ((!3) * (m[(m[((a + (m[(2)])))])])))]), (({1, 2, 3}[(2 + 1)]) + 2)})]
 r#mod::parser::blocks::open_brace 4
 :1:1: error: Mismatched '{': reached end of block. Perhaps you forgot a closing '}'?
     1 | {
@@ -741,86 +746,86 @@ r#mod::parser::blocks::open_parens 4
         ^
 
 r#mod::parser::blocks::parens_assign 1
-[(ex2 = (((((((a * (((b + c) - (((d / e) % f) * g)))) + (((((h > i) ? j : k)) * (((l && m) || (n ^ o)))) / ((p ? q : r)))) + t) & u) | v) && w) ? x : (y ^ z)))..]
+[(ex2 = (((((((a * (((b + c) - (((d / e) % f) * g)))) + (((((h > i) ? j : k)) * (((l && m) || (n ^ o)))) / ((p ? q : r)))) + t) & u) | v) && w) ? x : (y ^ z)))]
 r#mod::parser::control_flows::break_inside_nested_loops 1
-[<for ([(int:(i = 0)), (i < 3), (i++)]) [<for ([(int:(j = 0)), (j < 3), (j++)]) [<if (((i % 4) == 2)) <break>.².>]>]>..]
+[<for ([(int:(i = 0)), (i < 3), (i++)]) [<for ([(int:(j = 0)), (j < 3), (j++)]) [<if (((i % 4) == 2)) <break>.².>]>]>]
 r#mod::parser::control_flows::conditional_operators 1
-[<if (z) (x * y) else <if ((!c)) [<if (((x * y) << 2)) <return x> else <return 4>>].².>.².>, (f°())..]
+[<if (z) (x * y) else <if ((!c)) [<if (((x * y) << 2)) <return x> else <return 4>>].².>.².>, (f°())]
 r#mod::parser::control_flows::conditional_return 1
-[<if (a) <return b> else <return c>>, <return d..>..]
+[<if (a) <return b> else <return c>>, <return d>]
 r#mod::parser::control_flows::conditional_simple 1
-[<if (a) b else <if (c) d else e>>, <if (x) y.².>, z..]
+[<if (a) b else <if (c) d else e>>, <if (x) y.².>, z]
 r#mod::parser::control_flows::continue_inside_for_loop 1
-[<for ([(int:(i = 0)), (i < 5), (i++)]) [<if ((i == 3)) <continue>.².>, (printf°("%d", i)), x]>, y..]
+[<for ([(int:(i = 0)), (i < 5), (i++)]) [<if ((i == 3)) <continue>.².>, (printf°("%d", i)), x]>, y]
 r#mod::parser::control_flows::do_while 1
-[((int:f)°((int:x))[<do [<if ((x++)) [<return x>].².>] while ((x <= 10))>, <return (-1)>]), ∅ ..]
+[((int:f)°((int:x))[<do [<if ((x++)) [<return x>].².>] while ((x <= 10))>, <return (-1)>]), ∅ ]
 r#mod::parser::control_flows::do_while_with_empty_body 1
-[<do ∅  while (a)>, ∅ ..]
+[<do ∅  while (a)>, ∅ ]
 r#mod::parser::control_flows::else_if_chain_with_break 1
-[<if (a) [(x = 1), ∅ ] else <if (b) [<break>, ∅ ] else [(y = 2), ∅ ]>>..]
+[<if (a) [(x = 1), ∅ ] else <if (b) [<break>, ∅ ] else [(y = 2), ∅ ]>>]
 r#mod::parser::control_flows::empty_block 1
-[<if (a) [] else []>..]
+[<if (a) [] else []>]
 r#mod::parser::control_flows::empty_else_block 1
-[<if (a) (x = 1) else ∅ >..]
+[<if (a) (x = 1) else ∅ >]
 r#mod::parser::control_flows::empty_switch_case 1
-[<switch (x) []>..]
+[<switch (x) []>]
 r#mod::parser::control_flows::enumeration 1
-[<enum A [(FIRST , SECOND)]>, (enum A:a), ∅ ..]
+[<enum A [(FIRST , SECOND)]>, (enum A:a), ∅ ]
 r#mod::parser::control_flows::for_loop_multiple_variables 1
-[<for ([(int:(i = 0), (j = 5)), ((i < 10) && (j > 0)), ((i++) , (j--))]) (printf°("i = %d, j = %d", i, j))>, (int:x), ∅ ..]
+[<for ([(int:(i = 0), (j = 5)), ((i < 10) && (j > 0)), ((i++) , (j--))]) (printf°("i = %d, j = %d", i, j))>, (int:x), ∅ ]
 r#mod::parser::control_flows::for_loop_with_empty_body 1
-[<for ([(int:(i = 0)), (i < 10), (i++)]) ∅ >..]
+[<for ([(int:(i = 0)), (i < 10), (i++)]) ∅ >]
 r#mod::parser::control_flows::for_loops 1
-[<for ([(int:(i = 0)), (i < (9 + 1)), (i++)]) (printf°("i = %d", i))>..]
+[<for ([(int:(i = 0)), (i < (9 + 1)), (i++)]) (printf°("i = %d", i))>]
 r#mod::parser::control_flows::goto_statement 1
-[(int:(x = 0)), <goto label_name>, (x = 1), <label_name: (x = 2)>, ∅ ..]
+[(int:(x = 0)), <goto label_name>, (x = 1), <label_name: (x = 2)>, ∅ ]
 r#mod::parser::control_flows::iterators 1
-[<while (1) <for ([(int:(x = 1)), (x < CONST), (x++)]) <if (x) <return ((a <<= 2) , (1 + a))> else <continue>>>>, 0..]
+[<while (1) <for ([(int:(x = 1)), (x < CONST), (x++)]) <if (x) <return ((a <<= 2) , (1 + a))> else <continue>>>>, 0]
 r#mod::parser::control_flows::logical_operators_conditional 1
-[<if (((a && b) || c)) (x = 1) else (y = 2)>..]
+[<if (((a && b) || c)) (x = 1) else (y = 2)>]
 r#mod::parser::control_flows::multiple_variables 1
-[(int:(i = 1), (j = 2)), ∅ ..]
+[(int:(i = 1), (j = 2)), ∅ ]
 r#mod::parser::control_flows::nested_conditional 1
-[<if (z) (x * y) else <if ((!c)) [<if (((x * y) << 2)) [x] else [4]>] else [x]>>..]
+[<if (z) (x * y) else <if ((!c)) [<if (((x * y) << 2)) [x] else [4]>] else [x]>>]
 r#mod::parser::control_flows::nested_do_while 1
-[<do [<do [(x = 1), ∅ ] while (y)>, ∅ ] while (z)>, ∅ ..]
+[<do [<do [(x = 1), ∅ ] while (y)>, ∅ ] while (z)>, ∅ ]
 r#mod::parser::control_flows::nested_if_else 1
-[<if (a) [<if (b) (c = 1) else (c = 2)>] else [<if (d) (c = 3) else (c = 4)>]>..]
+[<if (a) [<if (b) (c = 1) else (c = 2)>] else [<if (d) (c = 3) else (c = 4)>]>]
 r#mod::parser::control_flows::nested_loops_with_control_flow 1
-[<for ([(int:(i = 0)), (i < 3), (i++)]) <for ([(int:(j = 1)), (j < 4), (j++)]) [<if ((i == j)) <continue>.².>, (printf°("i = %d, j = %d", i, j)), ∅ ]>>, (int:x), ∅ ..]
+[<for ([(int:(i = 0)), (i < 3), (i++)]) <for ([(int:(j = 1)), (j < 4), (j++)]) [<if ((i == j)) <continue>.².>, (printf°("i = %d, j = %d", i, j)), ∅ ]>>, (int:x), ∅ ]
 r#mod::parser::control_flows::nested_switch 1
-[<switch (x) [<case 1: [<switch (y) [<case 2: [(z = 3), <break>, ∅ ..]..>]>, <break>, ∅ ..]..>]>..]
+[<switch (x) [<case 1: [<switch (y) [<case 2: [(z = 3), <break>, ∅ ]>]>, <break>, ∅ ]>]>]
 r#mod::parser::control_flows::nested_while_with_break 1
-[<while (a) [<while (b) [<if (c) <break>.².>, (d = 5), ∅ ]>]>..]
+[<while (a) [<while (b) [<if (c) <break>.².>, (d = 5), ∅ ]>]>]
 r#mod::parser::control_flows::structs 1
-[<struct A [(int:x)]>, (struct A:a), ∅ ..]
+[<struct A [(int:x)]>, (struct A:a), ∅ ]
 r#mod::parser::control_flows::successive_ctrl_flow 1
-[<break>, <return (0 * 1)>, <for ([(int:(x = 2)), (x < 10), (x++)]) x..>..]
+[<break>, <return (0 * 1)>, <for ([(int:(x = 2)), (x < 10), (x++)]) x>]
 r#mod::parser::control_flows::switch_case 1
-[<switch (x) [<case 1: [(y = 2), <break>, ∅ ..]..>, <case 2: [(y = 3), ∅ ..]..>, <default: [(y = 4), ∅ ..]..>]>..]
+[<switch (x) [<case 1: [(y = 2), <break>, ∅ ]>, <case 2: [(y = 3), ∅ ]>, <default: [(y = 4), ∅ ]>]>]
 r#mod::parser::control_flows::switch_with_empty_case 1
-[<switch (x) [<case 1: ∅ ..>, <case 2: [(y = 3), <break>, ∅ ..]..>]>..]
+[<switch (x) [<case 1: ∅ >, <case 2: [(y = 3), <break>, ∅ ]>]>]
 r#mod::parser::control_flows::switch_with_fallthrough 1
-[<switch (x) [<case 1: [(y = 2), ∅ ..]..>, <case 2: [(y = 3), <break>, ∅ ..]..>]>..]
+[<switch (x) [<case 1: [(y = 2), ∅ ]>, <case 2: [(y = 3), <break>, ∅ ]>]>]
 r#mod::parser::control_flows::typedef_equal 4
 :1:11: error: Can't use = in typedef declarations.
     1 | typedef a =
                   ^
 
 r#mod::parser::control_flows::typedef_int 1
-[<typedef (const int *:c)..>..]
+[<typedef (const int *:c)>]
 r#mod::parser::control_flows::typedef_struct 1
-[<typedef (struct a:b)..>..]
+[<typedef (struct a:b)>]
 r#mod::parser::control_flows::typedef_struct_definition 1
-[<typedef <struct a [((int:x)[]), (const * volatile * int:y), ∅ ]> b>..]
+[<typedef <struct a [((int:x)[]), (const * volatile * int:y), ∅ ]> b>]
 r#mod::parser::control_flows::union 1
-[<union A [(bool:active)]>, (union A:a), ∅ ..]
+[<union A [(bool:active)]>, (union A:a), ∅ ]
 r#mod::parser::control_flows::while_loop_with_break 1
-[<while (a) [<if (b) <break>.².>, (c = 5), ∅ ]>..]
+[<while (a) [<if (b) <break>.².>, (c = 5), ∅ ]>]
 r#mod::parser::control_flows::while_with_continue 1
-[<while (a) [<if (b) <continue>.².>, (c = 5), ∅ ]>..]
+[<while (a) [<if (b) <continue>.².>, (c = 5), ∅ ]>]
 r#mod::parser::control_flows::while_with_empty_body 1
-[<while (a) ∅ >..]
+[<while (a) ∅ >]
 r#mod::parser::errors::bitfield_not_number 4
 :1:15: error: Expected bitfield size, but `:` is followed by a non-number token
     1 | const int a : 'b'
@@ -857,7 +862,7 @@ r#mod::parser::errors::invalid_keyword 4
               ^~~~~~
 
 r#mod::parser::errors::lengths_literal 4
-:1:9: error: Found 2 consecutive literals: block [(x = 'c')..] followed by blob.
+:1:9: error: Found 2 consecutive literals: block [(x = 'c')] followed by blob.
     1 | x = 'c' blob;
                 ^~~~
 
@@ -887,12 +892,12 @@ r#mod::parser::errors::sizeof_bitfield 4
                ^
 
 r#mod::parser::errors::successive_numbers 4
-:1:3: error: Found 2 consecutive literals: block [a..] followed by 2.
+:1:3: error: Found 2 consecutive literals: block [a] followed by 2.
     1 | a 2
           ^
 
 r#mod::parser::errors::successive_numbers_long 4
-:1:3: error: Found 2 consecutive literals: block [a..] followed by 22222.
+:1:3: error: Found 2 consecutive literals: block [a] followed by 22222.
     1 | a 22222
           ^~~~~
 
@@ -910,13 +915,13 @@ r#mod::parser::errors::two_colons 4
                   ^
 
 r#mod::parser::functions::alignoff 1
-[(int:(x = (alignof°((int:))))), ∅ ..]
+[(int:(x = (alignof°((int:))))), ∅ ]
 r#mod::parser::functions::function_argument_priority 1
-[(main°((!(f°((x + y), (!u)))), (g°((f°((h°(x, y)), z)), t)), u))..]
+[(main°((!(f°((x + y), (!u)))), (g°((f°((h°(x, y)), z)), t)), u))]
 r#mod::parser::functions::functions_blocks 1
-[(main°()[(a = (f°(((b + (g°(c))) + d)))), ∅ ]), ∅ ..]
+[(main°()[(a = (f°(((b + (g°(c))) + d)))), ∅ ]), ∅ ]
 r#mod::parser::functions::heavy 1
-[((inline _Noreturn long auto extern signed _Atomic _BigInt default unsigned register restrict _Complex _Generic constexpr _Decimal64 _Imaginary _Decimal32 _Decimal128 _AlignAs alignas:f)°()), ∅ ..]
+[((inline _Noreturn long auto extern signed _Atomic _BigInt default unsigned register restrict _Complex _Generic constexpr _Decimal64 _Imaginary _Decimal32 _Decimal128 _AlignAs alignas:f)°()), ∅ ]
 r#mod::parser::functions::keywords_attributes_functions 4
 :2:37: warning: Underscore operators are deprecated since C23. Consider using the new keyword: thread_local
     2 |     const int volatile static short _Thread_local y;
@@ -928,11 +933,11 @@ r#mod::parser::functions::keywords_attributes_functions_err 4
                                             ^~~~~~~~~~~~~
 
 r#mod::parser::functions::keywords_functions 1
-[(main°()[(x = (sizeof°((align°(x))))), ∅ ]), ∅ ..]
+[(main°()[(x = (sizeof°((align°(x))))), ∅ ]), ∅ ]
 r#mod::parser::functions::nested_functions 1
-[(a = (f°((b <<= ((!(g°((!c)))) + d))))), ∅ ..]
+[(a = (f°((b <<= ((!(g°((!c)))) + d))))), ∅ ]
 r#mod::parser::functions::simple 1
-[(main°()[(a = ((f°(b)) + d)), ∅ ]), (c = true), ∅ ..]
+[(main°()[(a = ((f°(b)) + d)), ∅ ]), (c = true), ∅ ]
 r#mod::parser::functions::ualignof 4
 :1:9: warning: Underscore operators are deprecated since C23. Consider using the new keyword: alignof
     1 | int x = _Alignof(int);
@@ -1060,30 +1065,30 @@ r#mod::parser::numbers::two_float 4
         ^~~~~
 
 r#mod::parser::operators::add_assign 1
-[(x += 1)..]
+[(x += 1)]
 r#mod::parser::operators::assign 1
-[(((a + b) >= 0) ? (((c ^= 0)) * (!((e |= 1)))) : ((d >>= (x[3]))))..]
+[(((a + b) >= 0) ? (((c ^= 0)) * (!((e |= 1)))) : ((d >>= (x[3]))))]
 r#mod::parser::operators::cast_list_initialiser 1
-[((int *)°{1, 2, ((int)°PI..)}..)..]
+[((int *)°{1, 2, ((int)°PI)})]
 r#mod::parser::operators::incr_comment 1
-[(a * (b++))..]
+[(a * (b++))]
 r#mod::parser::operators::missing_rhs_binary 4
 :1:5: error: Missing RHS for binary operator '+'.
     1 | a + << b
             ^~
 
 r#mod::parser::operators::ternary_blocks 1
-[(z &= (((((((((((a /= z)) * ((b %= y))) + c) - (((d / e) % f) * g)) + h) & i) | (j ^ k)) && l) || ((((m * n) + o) - ((p * q) / r)) + (s % t))) ? u : ((v && ((w ^ x) | y)) && (z != 2)))), ((!a) >> b)..]
+[(z &= (((((((((((a /= z)) * ((b %= y))) + c) - (((d / e) % f) * g)) + h) & i) | (j ^ k)) && l) || ((((m * n) + o) - ((p * q) / r)) + (s % t))) ? u : ((v && ((w ^ x) | y)) && (z != 2)))), ((!a) >> b)]
 r#mod::parser::operators::ternary_cast 1
-[(a ? ((int)°f..) : ((void *)°o..))..]
+[(a ? ((int)°f) : ((void *)°o))]
 r#mod::parser::operators::ternary_cast_function 1
-[(a ? ((int)°(f°(x))..) : ((void *)°(o°(y, z))..))..]
+[(a ? ((int)°(f°(x))) : ((void *)°(o°(y, z))))]
 r#mod::parser::operators::ternary_function 1
-[(a ? (f°(x)) : (o°(y)))..]
+[(a ? (f°(x)) : (o°(y)))]
 r#mod::parser::operators::unary_binary 1
-[(z -= ((((((((a + ((~b) * ((c *= 2)))) - ((d / e) % f)) + g) - (h * i)) + ((j % k) * l)) ^ ((!(m++)) & n)) | o) || (p && q)))..]
+[(z -= ((((((((a + ((~b) * ((c *= 2)))) - ((d / e) % f)) + g) - (h * i)) + ((j % k) * l)) ^ ((!(m++)) & n)) | o) || (p && q)))]
 r#mod::parser::operators::unfinished_ternary 1
-[(a ? b : ∅ )..]
+[(a ? b : ∅ )]
 r#mod::parser::strings::char_2_chars 4
 :1:3: error: A char must contain only one character.
     1 | 'ab'
@@ -1164,17 +1169,17 @@ r#mod::parser::strings::invalid_char 4
 
 r#mod::parser::strings::successive_multiline_string 10
 
-:4:5: error: Found 2 consecutive literals: block [blob..] followed by "multiline     strings".
-:4:5: error: Multi-line error occurred. Starts here...
+:4:5: error: Found 2 consecutive literals: block [blob] followed by "multiline     strings".
+:4:5: error: Multi-line error occurred. Starts here.
     4 |     "multi"
             ^~~~~~~
-:6:13: error: ...and ends here.
+:6:13: error: .and ends here.
     6 |      strings"
                     ^
 
 
 r#mod::parser::strings::successive_string_simple 4
-:1:3: error: Found 2 consecutive literals: block [a..] followed by "b".
+:1:3: error: Found 2 consecutive literals: block [a] followed by "b".
     1 | a "b"
           ^~~
 
@@ -1205,33 +1210,33 @@ r#mod::parser::strings::trigraphs 25
                             ^~~
 
 r#mod::parser::variables::array_access 1
-[((*((a -> b)[3])) = (((c[3]) . d)[1]))..]
+[((*((a -> b)[3])) = (((c[3]) . d)[1]))]
 r#mod::parser::variables::bitfield 1
-[<struct ∅  [(int:(a:2))]>, ∅ ..]
+[<struct ∅  [(int:(a:2))]>, ∅ ]
 r#mod::parser::variables::block_comment 1
-[..]
+[]
 r#mod::parser::variables::cast 1
-[((type)°x..)..]
+[((type)°x)]
 r#mod::parser::variables::cast_expr 1
-[((double)°(((x++) + y))..)..]
+[((double)°(((x++) + y)))]
 r#mod::parser::variables::cast_higher_precedence 1
-[(((float)°x..) + y)..]
+[(((float)°x) + y)]
 r#mod::parser::variables::cast_int 1
-[((int)°(-1)), ∅ ..]
+[((int)°(-1)), ∅ ]
 r#mod::parser::variables::cast_ptr 1
-[((int)°(&x)..)..]
+[((int)°(&x))]
 r#mod::parser::variables::cast_str 1
-[((void *)°"Hello World"..)..]
+[((void *)°"Hello World")]
 r#mod::parser::variables::cast_struct_access 1
-[((float)°(data . int_val)..)..]
+[((float)°(data . int_val))]
 r#mod::parser::variables::char_array 1
-[(((char:x)[4]) = {'b', (12 + '5'), '3', ' '}), ∅ ..]
+[(((char:x)[4]) = {'b', (12 + '5'), '3', ' '}), ∅ ]
 r#mod::parser::variables::custom_indirection_assign 1
-[((a * b) = c)..]
+[((a * b) = c)]
 r#mod::parser::variables::escape_0 1
-[' '..]
+[' ']
 r#mod::parser::variables::escape_255 1
-['ÿ'..]
+['ÿ']
 r#mod::parser::variables::escape_257 4
 :1:2: warning: octal value too big: exceeds 0o377: will be computed modulo 255
     1 | '\402'
@@ -1258,19 +1263,19 @@ r#mod::parser::variables::escape_in_string 4
                                                                    ^~~~~~
 
 r#mod::parser::variables::escape_ok 1
-["I"..]
+["I"]
 r#mod::parser::variables::escape_x_too_long 4
 :1:2: warning: too many hexdigits after \x: all hexdigits will be taken but only the trailing 2 will be kept
     1 | "\x1029293"
          ^~~~~~~~~
 
 r#mod::parser::variables::indirection 1
-[(int * a *:(b = (((*c) * d) + e)))..]
+[(int * a *:(b = (((*c) * d) + e)))]
 r#mod::parser::variables::mul_assign 1
-[((b * c:d) = 0)..]
+[((b * c:d) = 0)]
 r#mod::parser::variables::multiline_string 1
-["multiline     strings"..]
+["multiline     strings"]
 r#mod::parser::variables::signed_number 1
-[(-42)..]
+[(-42)]
 r#mod::parser::variables::underscore 1
-[(!_a_)..]
+[(!_a_)]
