@@ -14,6 +14,7 @@ use crate::parser::operators::api::{
     Associativity, Binary, Operator as _, OperatorConversions, Ternary, TernaryOperator, Unary
 };
 use crate::parser::symbols::api::{BracedBlock, Cast, ListInitialiser};
+use crate::parser::variable::api::PureType as _;
 
 impl Push for Ast {
     fn push_block_as_leaf(&mut self, ast: Self) -> Result<(), String> {
@@ -35,9 +36,16 @@ impl Push for Ast {
             Self::ParensBlock(old) => {
                 let (parens, parens_location) = take(old).into_inner();
                 if let Some(ty) = parens.into_type() {
+                    let full = if let Self::ParensBlock(parens_value) = &ast
+                        && parens_value.is_pure_type()
+                    {
+                        false
+                    } else {
+                        true
+                    };
                     *self = Self::Cast(Cast {
                         dest_type: ty,
-                        full: false,
+                        full,
                         value: ast.into_box(),
                         parens_location,
                     });

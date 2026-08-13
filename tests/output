@@ -179,6 +179,19 @@ r#mod::lineariser::call_undeclared 4
 r#mod::lineariser::cast_long_long 2
 [] const long long int x0 = 1
 [] int x1 = x0
+r#mod::lineariser::cast_recast_2_lit 4
+:1:14: error: Found 2 consecutive literals: cast ((int)°x) followed by y.
+    1 | (bool)(int)x y
+                     ^
+
+r#mod::lineariser::cast_recast_key 3
+[] const bool x0 = false
+[] int x1 = x0
+[] bool x2 = x1
+r#mod::lineariser::cast_recast_lit 3
+[] const int x0 = 2
+[] int x1 = x0
+[] bool x2 = x1
 r#mod::lineariser::cast_recast_var_assign 4
 [x] char x0 = ∅ 
 [] int x1 = x0

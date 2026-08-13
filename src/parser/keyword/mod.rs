@@ -36,11 +36,9 @@ pub fn handle_keyword(
     let ast_push_ctx = match parsed_keyword {
         KeywordParsing::Attr(_) => AstPushContext::UserVariable,
         KeywordParsing::Pushable(PushableKeyword::Else) => AstPushContext::Else,
-        KeywordParsing::CtrlFlow(_)
-        | KeywordParsing::False
-        | KeywordParsing::Func(_)
-        | KeywordParsing::Null
-        | KeywordParsing::True => AstPushContext::None,
+        KeywordParsing::CtrlFlow(_) | KeywordParsing::False | KeywordParsing::True =>
+            AstPushContext::Literal,
+        KeywordParsing::Func(_) | KeywordParsing::Null => AstPushContext::None,
     };
     let located_keyword = keyword_location.wrap(parsed_keyword);
     if current.can_push_leaf_with_ctx(ast_push_ctx) {

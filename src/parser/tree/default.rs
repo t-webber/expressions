@@ -34,7 +34,7 @@ impl Ast {
     pub(crate) fn can_push_leaf_with_ctx(&self, ctx: AstPushContext) -> bool {
         #[cfg(feature = "debug")]
         crate::lgp!("Can push leaf in {self} with ctx {ctx:?}");
-        match self {
+        let can = match self {
             Self::Empty
             | Self::Cast(Cast { full: true, .. })
             | Self::Ternary(Ternary { failure: None, .. }) => true,
@@ -68,7 +68,10 @@ impl Ast {
             }
             // Complete not full because: `if (0) 1; 2;`
             Self::ControlFlow(ctrl) => !ctrl.is_complete(),
-        }
+        };
+        #[cfg(feature = "debug")]
+        crate::lgp!("Can push leaf in {self} with ctx {ctx:?} => {can}");
+        can
     }
 
     /// Creates an empty [`Ast`] inside a [`Box`] to initialise nodes
@@ -203,6 +206,8 @@ impl Ast {
         if let Some(last) = vec.last_mut() {
             let ctx = if matches!(node, Self::Variable(_)) {
                 AstPushContext::UserVariable
+            } else if matches!(node, Self::Leaf(_)) {
+                AstPushContext::Literal
             } else if let Self::ParensBlock(parens) = &node
                 && parens.is_pure_type()
             {

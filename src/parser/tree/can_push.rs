@@ -13,7 +13,7 @@ impl CanPush for Ast {
 /// Context to specify what are we trying to push into the [`Ast`].
 ///
 /// See [`Ast::can_push_leaf`] for more information.
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Copy, Clone)]
 pub enum AstPushContext {
     /// Any context is good
     Any,
@@ -21,6 +21,8 @@ pub enum AstPushContext {
     Cast,
     /// Trying to see if an `else` block ca be added
     Else,
+    /// Any constant literal value.
+    Literal,
     /// Nothing particular
     #[default]
     None,
@@ -30,18 +32,18 @@ pub enum AstPushContext {
 
 impl AstPushContext {
     /// Checks if the context can have a cast.
-    pub const fn is_castable(&self) -> bool {
-        matches!(self, &Self::Any | &Self::UserVariable | &Self::Cast)
+    pub const fn is_castable(self) -> bool {
+        matches!(self, Self::Any | Self::UserVariable | Self::Cast | Self::Literal)
     }
 
     /// Checks if the context can have an `else`
-    pub const fn is_else(&self) -> bool {
-        matches!(self, &Self::Any | &Self::Else)
+    pub const fn is_else(self) -> bool {
+        matches!(self, Self::Any | Self::Else)
     }
 
     /// Checks if the context can have a variable
-    pub const fn is_user_variable(&self) -> bool {
-        matches!(self, &Self::Any | &Self::UserVariable)
+    pub const fn is_user_variable(self) -> bool {
+        matches!(self, Self::Any | Self::UserVariable)
     }
 }
 
