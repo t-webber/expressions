@@ -92,7 +92,9 @@ impl Variable {
     pub fn into_type(self) -> Option<Vec<Located<Attribute>>> {
         match self.value {
             VariableValue::AttributeVariable(attr) => attr.into_type(),
-            VariableValue::VariableName(..) => None,
+            VariableValue::VariableName(loc, VariableName::UserDefined(name)) =>
+                Some(vec![loc.wrap(Attribute::User(name))]),
+            VariableValue::VariableName(_, VariableName::Keyword(_)) => None,
         }
     }
 

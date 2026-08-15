@@ -201,6 +201,10 @@ r#mod::lineariser::cast_recast_var_unused 3
 [x] char x0 = ∅ 
 [] int x1 = x0
 [] bool x2 = x1
+r#mod::lineariser::cast_typenames 3
+[c] int x0 = ∅ 
+[] b x1 = x0
+[] a x2 = x1
 r#mod::lineariser::check_id_not_skipped 3
 [x] int x0 = x1
 [] const int x1 = 2

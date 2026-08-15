@@ -199,4 +199,6 @@ cast_recast_key: "(bool)(int)false"
 
 cast_recast_2_lit: "(bool)(int)x y"
 
+cast_typenames: "int c; (a)(b)c"
+
 );
