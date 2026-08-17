@@ -2,9 +2,7 @@
 //!
 //! See [`lex`] for more information.
 
-use super::state::api::{
-    CommentState, EscapeState, LexingState as LS, SymbolState, end_current, handle_escape
-};
+use super::state::api::{CommentState, EscapeState, LexingState as LS, SymbolState, end_current};
 use super::types::api::{LexingData, Token};
 use crate::errors::api::{LocationPointer, Res};
 
@@ -38,10 +36,28 @@ fn lex_char(
         }
 
         /* Escaped character */
-        (_, state @ (LS::Str(_) | LS::Char(None)), escape @ Some(_)) =>
-            if let Some(additional) = handle_escape(ch, state, lex_data, escape, location) {
-                lex_char(additional, location, lex_data, state, escape, eol);
-            },
+        (_, state @ (LS::Str(_) | LS::Char(None)), escape @ Some(_)) => {
+            if let Some((escaped, additional)) = escape
+                .as_mut()
+                .expect("see match above")
+                .push_one_char_in_escape(ch, lex_data, location)
+            {
+                match state {
+                    LS::Str(str) => str.0.push(escaped),
+                    LS::Char(inner @ None) => *inner = Some(escaped),
+                    LS::Char(_)
+                    | LS::Comment(_)
+                    | LS::Ident(_)
+                    | LS::StartOfLine
+                    | LS::Symbols(_)
+                    | LS::Unset => unreachable!(),
+                }
+                *escape = None;
+                if let Some(inner) = additional {
+                    lex_char(inner, location, lex_data, state, escape, eol);
+                }
+            }
+        }
 
         /* Create comment */
         ('*', state, _) if state.symbol_and_last_is('/') => {

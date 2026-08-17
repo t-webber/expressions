@@ -2,7 +2,6 @@
 //! sequences.
 
 use crate::errors::api::LocationPointer;
-use crate::lexer::state::api::LexingState;
 use crate::lexer::types::api::{EscapeSequence, LexingData};
 
 /// Used to store the current escape state and the escape sequence values if
@@ -55,13 +54,33 @@ impl EscapeState {
         None
     }
 
-    /// Pushes one more char in the escape sequence.
+    /// Handle character in a escape context.
     ///
-    /// It will modify the state if it was pending a character, or return the
-    /// result of the sequence finished. If the last character could be put
-    /// in the sequence, it is returned.
+    /// This function pushes the characters in escaped sequences or characters,
+    /// and pushes the character resulting of the escaped sequence into the
+    /// string or char.
+    ///
+    /// # Escaped characters
+    ///
+    /// Single characters after the `\` (e.g., `\n`). If the character doesn't
+    /// mean anything escaped, it is returned as raw with a warning (e.g.,
+    /// `\o`).
+    ///
+    /// # Escape sequences
+    ///
+    /// - 4-digit hexadecimal code: `\uXXXX`
+    ///     - The `\u` prefix must be followed by 4 hexdigits.
+    /// - 8-digit hexadecimal code: `\UXXXXXXXX`
+    ///     - The `\U` prefix must be followed by 8 hexdigits.
+    /// - up-to-3 digit octal code: `\XXX`
+    ///     - The `\` prefix can be followed by up to 3 octdigits, and can start
+    ///       with 0 (`\0`, `\2`, `\07`, etc.)
+    /// - hexadecimal modular code: `\xXX`
+    ///     - The `\x` can be followed by any number of digits but only the last
+    ///       2 hexdigits will be kept (i.e., modulo 0xff). For instance, `\x3f`
+    ///       will produce a '?' and so will `\x23f`.
     #[must_use]
-    fn push_one_char_in_escape(
+    pub fn push_one_char_in_escape(
         &mut self,
         ch: char,
         lex_data: &mut LexingData,
@@ -93,55 +112,4 @@ impl From<EscapeSequence> for EscapeState {
     fn from(value: EscapeSequence) -> Self {
         Self::Sequence(value)
     }
-}
-
-/// Handle character in a escape context.
-///
-/// This function pushes the characters in escaped sequences or characters, and
-/// pushes the character resulting of the escaped sequence into the string or
-/// char.
-///
-/// # Escaped characters
-///
-/// Single characters after the `\` (e.g., `\n`). If the character doesn't mean
-/// anything escaped, it is returned as raw with a warning (e.g., `\o`).
-///
-/// # Escape sequences
-///
-/// - 4-digit hexadecimal code: `\uXXXX`
-///     - The `\u` prefix must be followed by 4 hexdigits.
-/// - 8-digit hexadecimal code: `\UXXXXXXXX`
-///     - The `\U` prefix must be followed by 8 hexdigits.
-/// - up-to-3 digit octal code: `\XXX`
-///     - The `\` prefix can be followed by up to 3 octdigits, and can start
-///       with 0 (`\0`, `\2`, `\07`, etc.)
-/// - hexadecimal modular code: `\xXX`
-///     - The `\x` can be followed by any number of digits but only the last 2
-///       hexdigits will be kept (i.e., modulo 0xff). For instance, `\x3f` will
-///       produce a '?' and so will `\x23f`.
-#[must_use]
-pub fn handle_escape(
-    ch: char,
-    lex_state: &mut LexingState,
-    lex_data: &mut LexingData,
-    escape: &mut Option<EscapeState>,
-    location: &LocationPointer,
-) -> Option<char> {
-    use LexingState as LS;
-    let (escaped, additional) = escape
-        .as_mut()
-        .expect("see match above")
-        .push_one_char_in_escape(ch, lex_data, location)?;
-    match lex_state {
-        LS::Str(str) => str.0.push(escaped),
-        LS::Char(inner @ None) => *inner = Some(escaped),
-        LS::Char(_)
-        | LS::Comment(_)
-        | LS::Ident(_)
-        | LS::StartOfLine
-        | LS::Symbols(_)
-        | LS::Unset => unreachable!(),
-    }
-    *escape = None;
-    additional
 }

@@ -5,6 +5,7 @@
     clippy::print_stderr,
     clippy::panic,
     clippy::expect_used,
+    clippy::unwrap_in_result,
     reason = "it's a cli"
 )]
 

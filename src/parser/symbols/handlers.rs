@@ -84,7 +84,11 @@ impl Ast {
         }
     }
 
-    /// Handler to push a comma into an [`Self`]
+    /// Handler to push a comma into an [`Self`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if a comma creates a syntax error in this context.
     pub fn handle_comma(&mut self, location: ErrorLocation) -> Result<(), String> {
         if let Self::FunctionArgsBuild(vec, _, loc) = self {
             vec.push(Self::Empty);
@@ -99,6 +103,12 @@ impl Ast {
 
     /// Handler to push a symbol that can be represented by 2 different unary
     /// operators.
+    ///
+    /// # Errors
+    ///
+    /// If pushing the first operator fails, the error isn't returned, and it
+    /// tries to push the second one. If pushing the second operator fails, then
+    /// the error is returned.
     pub fn handle_double_unary(
         &mut self,
         first: Located<UnaryOperator>,

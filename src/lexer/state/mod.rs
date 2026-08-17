@@ -9,7 +9,7 @@ pub mod api {
     #![allow(clippy::pub_use, reason = "expose simple API")]
 
     pub use super::end_state::end_current;
-    pub use super::escape::{EscapeState, handle_escape};
+    pub use super::escape::EscapeState;
     pub use super::lex_state::{CommentState, LexingState};
     pub use super::symbol::SymbolState;
 }
