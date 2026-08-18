@@ -67,9 +67,13 @@ impl ControlFlow for ParensBlockCtrl {
     }
 
     fn location(&self) -> ErrorLocation {
-        self.block
-            .location()
-            .into_extended(self.keyword.as_location())
+        if self.block.is_empty() {
+            self.keyword.as_location()
+        } else {
+            self.block
+                .location()
+                .into_extended(self.keyword.as_location())
+        }
     }
 
     fn push_colon(&mut self) -> bool {

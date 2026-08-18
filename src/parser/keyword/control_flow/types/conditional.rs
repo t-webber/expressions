@@ -99,11 +99,12 @@ impl ControlFlow for ConditionCtrl {
     }
 
     fn location(&self) -> ErrorLocation {
-        self.failure
-            .as_ref()
-            .map_or(&self.success, |last| last)
-            .location()
-            .into_extended(self.keyword_location)
+        let last = self.failure.as_ref().map_or(&self.success, |last| last);
+        if last.is_empty() {
+            self.keyword_location
+        } else {
+            self.location().into_extended(self.keyword_location)
+        }
     }
 
     fn push_colon(&mut self) -> bool {

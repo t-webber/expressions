@@ -53,7 +53,11 @@ impl ControlFlow for ReturnCtrl {
     }
 
     fn location(&self) -> ErrorLocation {
-        self.value.location().into_extended(self.return_location)
+        if self.value.is_empty() {
+            self.return_location
+        } else {
+            self.value.location().into_extended(self.return_location)
+        }
     }
 
     fn push_colon(&mut self) -> bool {

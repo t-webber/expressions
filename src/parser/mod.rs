@@ -21,6 +21,7 @@ pub mod api {
         AttributeKeyword, BasicDataType, Modifiers, Qualifiers, SpecialAttributes, Storage, UserDefinedTypes
     };
     pub use crate::parser::keyword::control_flow::node::ControlFlowNode;
+    pub use crate::parser::keyword::control_flow::types::typedef::TypedefValidContent;
 }
 
 mod keyword;

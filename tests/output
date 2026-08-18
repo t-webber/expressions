@@ -652,6 +652,56 @@ r#mod::lineariser::todo_attr 16
     1 | _Generic alignas _BigInt typeof typeof_unqual static int x = 1
                          ^~~~~~~                             ^~~
 
+r#mod::lineariser::typedef::typedef_alone 4
+:1:1: error: Missing aliased type and name after typedef.
+    1 | typedef
+        ^~~~~~~
+
+r#mod::lineariser::typedef::typedef_break 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef break
+        ^~~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_do 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef do
+        ^~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_goto 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef goto
+        ^~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_if 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef if
+        ^~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_label 4
+:1:14: error: Found extra ':': Tried to push colon in a control flow that wasn't expecting one.
+    1 | typedef label:
+                     ^
+
+r#mod::lineariser::typedef::typedef_named_struct_no_name 4
+:1:1: error: Missing name after aggregate type in typedef.
+    1 | typedef struct a {};
+        ^~~~~~~~~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_return 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef return
+        ^~~~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_struct_no_name 4
+:1:1: error: Missing name after aggregate type in typedef.
+    1 | typedef struct {};
+        ^~~~~~~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_while 4
+:1:1: error: Typedef expected type, found control flow.
+    1 | typedef while
+        ^~~~~~~~~~~~~
+
 r#mod::lineariser::unaries 10
 [a] int x0 = ∅ 
 [] const bool x1 = ! x0

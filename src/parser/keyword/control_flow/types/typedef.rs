@@ -3,9 +3,11 @@
 use core::fmt;
 
 use crate::EMPTY;
-use crate::errors::api::{ErrorLocation, Located};
+use crate::errors::api::{CompileError, ErrorLocation, Located};
+use crate::parser::api::Attribute;
 use crate::parser::keyword::control_flow::node::ControlFlowNode;
 use crate::parser::keyword::control_flow::traits::ControlFlow;
+use crate::parser::keyword::control_flow::types::ident_block::IdentBlockCtrl;
 use crate::parser::modifiers::push::Push;
 use crate::parser::operators::api::OperatorConversions;
 use crate::parser::tree::Ast;
@@ -14,6 +16,9 @@ use crate::parser::variable::api::VariableConversion as _;
 use crate::utils::{display, repr_fullness, repr_option};
 
 /// Content of the typedef, i.e., what it aliases and to what.
+///
+/// This is a parsing state, meaning it may contain unfinished nodes. For the
+/// finished type, refer to [`TypedefValidContent`].
 #[derive(Debug, Default)]
 enum TypedefContent {
     /// Typedef in a type definition
@@ -38,9 +43,52 @@ enum TypedefContent {
     Type(Variable),
 }
 
+/// Content of the typedef, i.e., what it aliases and to what.
+#[derive(Debug)]
+pub enum TypedefValidContent {
+    /// Typedef in a type definition
+    ///
+    /// # Examples
+    ///
+    /// ```c
+    /// typedef struct {} name;
+    /// ```
+    Definition(Box<IdentBlockCtrl>, Located<String>),
+    /// Typedef in a type redefinition
+    ///
+    /// # Examples
+    ///
+    /// ```c
+    /// typedef struct A name;
+    /// typedef int name2;
+    /// ```
+    Type(Vec<Located<Attribute>>),
+}
+
 /// Control flow for `typedef` keyword.
 #[derive(Debug)]
 pub struct TypedefCtrl(TypedefContent, ErrorLocation);
+
+impl TypedefCtrl {
+    /// Returns the inner declaration of the typedef.
+    pub fn into_inner(self) -> Result<TypedefValidContent, CompileError> {
+        let loc = self.location();
+        match self.0 {
+            TypedefContent::Definition(ctrl, maybe_name) =>
+                if let ControlFlowNode::IdentBlock(ident_block_ctrl) = *ctrl {
+                    maybe_name.map_or_else(|| Err(loc.fail("Missing name after aggregate type in typedef.".to_owned())), |name| Ok(TypedefValidContent::Definition(Box::new(ident_block_ctrl), name)))
+                } else {
+                    Err(loc.fail("Typedef expected type, found control flow.".to_owned()))
+                },
+            TypedefContent::None =>
+                Err(loc.fail("Missing aliased type and name after typedef.".to_owned())),
+            TypedefContent::Type(variable) => variable
+                .into_attrs()
+                .map_err(|err| loc.fail(err))
+                .map(TypedefValidContent::Type),
+        }
+    }
+}
 
 impl ControlFlow for TypedefCtrl {
     type Keyword = ErrorLocation;

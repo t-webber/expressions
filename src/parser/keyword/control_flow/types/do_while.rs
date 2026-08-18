@@ -51,10 +51,18 @@ impl ControlFlow for DoWhileCtrl {
     }
 
     fn location(&self) -> ErrorLocation {
-        self.while_found
-            .as_ref()
-            .map_or_else(|| self.loop_block.location(), Clone::clone)
-            .into_extended(self.keyword_location)
+        self.while_found.map_or_else(
+            || {
+                if self.loop_block.is_empty() {
+                    self.keyword_location
+                } else {
+                    self.loop_block
+                        .location()
+                        .into_extended(self.keyword_location)
+                }
+            },
+            |while_loc| while_loc.into_extended(self.keyword_location),
+        )
     }
 
     fn push_colon(&mut self) -> bool {

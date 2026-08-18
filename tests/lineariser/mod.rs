@@ -3,6 +3,7 @@
 mod add;
 mod literals;
 mod op;
+mod typedef;
 
 crate::ssa!(
 

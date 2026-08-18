@@ -4,7 +4,7 @@ use crate::lineariser::basic_block::{BasicBlocks, Id, Instruction};
 use crate::lineariser::state::LState;
 use crate::lineariser::symbol::Value;
 use crate::lineariser::types::Type;
-use crate::parser::api::{Ast, Cast, ControlFlowNode};
+use crate::parser::api::{Ast, Cast, ControlFlowNode, TypedefValidContent};
 
 impl Ast {
     /// Pushes some content into the basic blocks.
@@ -66,6 +66,14 @@ impl Ast {
                         Some(Id::NotFound)
                     }
                 }
+            }
+            Self::ControlFlow(ControlFlowNode::Typedef(typedef)) => {
+                match typedef.into_inner() {
+                    Ok(TypedefValidContent::Definition(..)) => todo!(),
+                    Ok(TypedefValidContent::Type(_)) => todo!(),
+                    Err(err) => state.push_error(err),
+                }
+                None
             }
             Self::FunctionArgsBuild(..) | Self::ListInitialiser(_) | Self::ControlFlow(_) =>
                 todo!("{self:?}"),
