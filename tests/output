@@ -667,6 +667,16 @@ r#mod::lineariser::typedef::typedef_do 4
     1 | typedef do
         ^~~~~~~~~~
 
+r#mod::lineariser::typedef::typedef_end_keyword 4
+:1:1: error: Missing name after const in typedef expression.
+    1 | typedef const
+        ^~~~~~~~~~~~~
+
+r#mod::lineariser::typedef::typedef_end_star 4
+:1:1: error: Missing name after type in typedef expression.
+    1 | typedef int *
+        ^~~~~~~~~~~~~
+
 r#mod::lineariser::typedef::typedef_goto 4
 :1:1: error: Typedef expected type, found control flow.
     1 | typedef goto

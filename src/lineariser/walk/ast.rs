@@ -69,8 +69,8 @@ impl Ast {
             }
             Self::ControlFlow(ControlFlowNode::Typedef(typedef)) => {
                 match typedef.into_inner() {
-                    Ok(TypedefValidContent::Definition(..)) => todo!(),
-                    Ok(TypedefValidContent::Type(_)) => todo!(),
+                    Ok((TypedefValidContent::Definition(..), _)) => todo!(),
+                    Ok((TypedefValidContent::Type(_), _)) => todo!(),
                     Err(err) => state.push_error(err),
                 }
                 None

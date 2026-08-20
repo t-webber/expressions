@@ -20,4 +20,8 @@ typedef_break: "typedef break"
 
 typedef_alone: "typedef"
 
+typedef_end_star: "typedef int *"
+
+typedef_end_keyword: "typedef const"
+
 );

@@ -53,7 +53,7 @@ pub enum TypedefValidContent {
     /// ```c
     /// typedef struct {} name;
     /// ```
-    Definition(Box<IdentBlockCtrl>, Located<String>),
+    Definition(Box<IdentBlockCtrl>),
     /// Typedef in a type redefinition
     ///
     /// # Examples
@@ -71,21 +71,29 @@ pub struct TypedefCtrl(TypedefContent, ErrorLocation);
 
 impl TypedefCtrl {
     /// Returns the inner declaration of the typedef.
-    pub fn into_inner(self) -> Result<TypedefValidContent, CompileError> {
+    pub fn into_inner(self) -> Result<(TypedefValidContent, Located<String>), CompileError> {
         let loc = self.location();
         match self.0 {
             TypedefContent::Definition(ctrl, maybe_name) =>
                 if let ControlFlowNode::IdentBlock(ident_block_ctrl) = *ctrl {
-                    maybe_name.map_or_else(|| Err(loc.fail("Missing name after aggregate type in typedef.".to_owned())), |name| Ok(TypedefValidContent::Definition(Box::new(ident_block_ctrl), name)))
+                    maybe_name.map_or_else(|| Err(loc.fail("Missing name after aggregate type in typedef.".to_owned())), |name| Ok(( TypedefValidContent::Definition(Box::new(ident_block_ctrl)) , name)))
                 } else {
                     Err(loc.fail("Typedef expected type, found control flow.".to_owned()))
                 },
             TypedefContent::None =>
                 Err(loc.fail("Missing aliased type and name after typedef.".to_owned())),
-            TypedefContent::Type(variable) => variable
-                .into_attrs()
-                .map_err(|err| loc.fail(err))
-                .map(TypedefValidContent::Type),
+            TypedefContent::Type(variable) => {
+                let mut attrs = variable.into_attrs().map_err(|err| loc.fail(err))?;
+                match attrs.pop().map(Located::into_inner) {
+                    None => unreachable!(),
+                    Some((Attribute::Indirection, _)) =>
+                        Err(loc.fail("Missing name after type in typedef expression.".to_owned())),
+                    Some((Attribute::Keyword(kw), _)) =>
+                        Err(loc.fail(format!("Missing name after {kw} in typedef expression."))),
+                    Some((Attribute::User(name), name_loc)) =>
+                        Ok((TypedefValidContent::Type(attrs), name_loc.wrap(name))),
+                }
+            }
         }
     }
 }
