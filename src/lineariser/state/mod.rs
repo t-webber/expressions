@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 use crate::errors::api::CompileError;
 use crate::lineariser::symbol::{ElementBuilder, FunctionBuilder, LiteralBuilder, Symbol};
+use crate::lineariser::types::Type;
 use crate::parser::api::Literal;
 
 /// Linearising State used to convert the parsed
@@ -30,4 +31,6 @@ pub struct LState {
     /// The actual values of the built symbols, ready to be handed over to the
     /// Ssa.
     pub(super) symbols: Vec<Symbol>,
+    /// List of declared type definitions.
+    pub(super) typedefs: HashMap<String, Type>,
 }

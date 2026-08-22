@@ -24,4 +24,6 @@ typedef_end_star: "typedef int *"
 
 typedef_end_keyword: "typedef const"
 
+variable_declaration: "typedef const int x; x y"
+
 );

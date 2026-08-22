@@ -712,6 +712,8 @@ r#mod::lineariser::typedef::typedef_while 4
     1 | typedef while
         ^~~~~~~~~~~~~
 
+r#mod::lineariser::typedef::variable_declaration 1
+[y] x x0 = ∅ 
 r#mod::lineariser::unaries 10
 [a] int x0 = ∅ 
 [] const bool x1 = ! x0

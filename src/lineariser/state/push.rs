@@ -9,7 +9,7 @@ use crate::lineariser::basic_block::BasicBlocks;
 use crate::lineariser::state::LState;
 use crate::lineariser::symbol::{ElementBuilder, FunctionBuilder, LiteralBuilder, Symbol, Value};
 use crate::lineariser::types::{ReturnType, Type};
-use crate::parser::api::Literal;
+use crate::parser::api::{Attribute, Literal};
 
 impl LState {
     /// Creates a variable [`Symbol`].
@@ -193,5 +193,21 @@ impl LState {
         let ty = Type::from_lit(&literal);
         self.literals.insert(literal, LiteralBuilder { id, ty });
         id
+    }
+
+    /// Creates a new type alias definition (`typedef`).
+    pub fn push_typedef(&mut self, name: Located<String>, attrs: &[Located<Attribute>]) {
+        let str = name.as_value();
+        if self.find_declaration(str).is_some()
+            || self.find_function(str).is_some()
+            || self.typedefs.contains_key(str)
+        {
+            self.push_error(name.as_location().fail(format!(
+                "Can't use '{str}' as type name as it is already declared as a variable",
+            )));
+            return;
+        }
+        let ty = self.store_errors(Type::from_attributes(attrs));
+        self.typedefs.insert(name.drop_location(), ty);
     }
 }
